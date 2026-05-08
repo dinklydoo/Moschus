@@ -23,8 +23,11 @@ This will give the following template file `<filename>.musk`:
     // any user defined global utility code can go here
 >
 
-@token<
-    // define your token type here (**include full namespace**)
+@token_obj< 
+    // token obj type 
+>
+@token_type<
+    // token id enum
 >
 
 @declarations<
