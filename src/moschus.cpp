@@ -1,5 +1,5 @@
 #include "musk_template.hpp"
-#include "argparse/argparse.hpp"
+#include <argparse/argparse.hpp>
 
 int main(int argc, char* argv[]) {
     argparse::ArgumentParser program("moschus");

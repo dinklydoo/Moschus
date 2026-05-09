@@ -1,26 +1,27 @@
-@includes<
+@includes[
     // write any include headers here
->
+]
 
-@utilities<
+@utilities[
     // any user defined global utility code can go here
->
+]
 
-@token_obj< 
+@token_obj[
     // token obj type 
->
-@token_type<
+]
+
+@token_type[
     // token id enum
->
+]
 
-@declarations<
+@declarations[
     // add terminal and non-terminal symbol declarations
->
+]
 
-@start<
+@start[
     // forward declare start non-terminal symbol
->
+]
 
-@productions<
+@productions[
     // non-terminal expansions/production rules
->
+]

@@ -1,64 +1,66 @@
 # Moschus Usage
-Moschous follows very similar syntax to other parser generators like yacc and ANTLR however some of the syntax is unique.
+Moschus follows yacc production syntax however the parser file defined as the `.musk` file is made to be more intuitive and structured than yacc.
 
 Unlike YACC and ANTLR however Moschus supports LR(1) grammars as opposed to LALR(1) in Yacc and LR(k-ish?) in ANTLR.
 
-To define a Moschous Parser File you can either create one from scratch with any name suffixed with `.musk`:
+To define a Moschus Parser File you can either create one from scratch with any name suffixed with `.musk`:
 ~~~
-<parser_name>.musk
+[filename].musk
 ~~~
 Or create a templated `.musk` file with the command:
 ~~~
-> muschous -t <filename>
+> muschous -t [filename]
 OR
-> muschous --template <filename>
+> muschous --template [filename]
 ~~~
-This will give the following template file `<filename>.musk`:
+This will give the following template file `[filename].musk`:
 ~~~
-@includes<
+@includes[
     // write any include headers here
->
+]
 
-@utilities<
+@utilities[
     // any user defined global utility code can go here
->
+]
 
-@token_obj< 
+@token_obj[ 
     // token obj type 
->
-@token_type<
+]
+@token_type[
     // token id enum
->
+]
 
-@declarations<
+@declarations[
     // add terminal and non-terminal symbol declarations
->
+]
 
-@start<
+@start[
     // forward declare start non-terminal symbol
->
+]
 
-@productions<
+@productions[
     // non-terminal expansions/production rules
->
+]
 ~~~
 
 A small example of a small arithmetic `.musk` file looks like this
 ~~~
-@includes<
+@includes[
     include "tokens.hpp"
     include "ast.hpp"
->
+]
 
-@utilities<
+@utilities[
+    // redundant here but just a POC
+
     ast* tree;
     TypeSystem ts = TypeSystem::instance();
->
+]
 
-@token_obj<token::Token>
-@token_type<token::TokenKind>
+@token_obj[token::Token]
+@token_type[token::TokenKind]
 
-@declarations<
+@declarations[
     token INT
     token ADD
     token SUB
@@ -71,10 +73,10 @@ A small example of a small arithmetic `.musk` file looks like this
     arith_expr* MUL_EXP
     arith_expr* DIV_EXP
 
->
+]
 
-@start<CALC_EXP>
-@productions<
+@start[CALC_EXP]
+@productions[
     CALC_EXP : ADD_EXP $$ {
         return new CalcExp($1);
     };
@@ -89,17 +91,17 @@ A small example of a small arithmetic `.musk` file looks like this
     ;
 
     etc...
->
+]
 ~~~
 Tokens are unique in that user defined tokens are required, as of now there is no compatible lexer 
 (however there are plans to implement one). 
 The user (YOU) must define a token object/struct which can be provided to the parser with
-`@token_obj<token struct>`
+`@token_obj[token struct]`
 Note: the full namespace path should be provided UNLESS if a using macro is defined in user code.
 
 This token struct should then implement the interface method `token_type get_token(void)` where 
 `token_type` is a user defined enum class that represents the actual identifiers of tokens 
-which is provided using `@token_type<token enum>`.
+which is provided using `@token_type[token enum]`.
 
 Note that the token ID's in this enum should match the token declarations provided in `@declarations`, 
 it is okay to not declare some members of the enum class if they are not used, 
@@ -116,7 +118,7 @@ namespace tok {
     struct Token {
     private:
         TokenKind kind;
-        std::variant<int, float> value;
+        std::variant[int, float] value;
 
     public:
         // note : the enum class is not required to be nested
@@ -133,8 +135,8 @@ namespace tok {
 
 // we would then provide the token types in .musk as
 
-@token_obj<tok::Token>
-@token_type<tok::Token::TokenKind>
+@token_obj[tok::Token]
+@token_type[tok::Token::TokenKind]
 
 ~~~
 
