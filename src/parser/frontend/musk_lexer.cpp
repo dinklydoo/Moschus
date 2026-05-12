@@ -1,6 +1,11 @@
 #line 1 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+    #include "musk_tokens.hpp"
+    #define YY_DECL MuskToken yylex()
 
-#line 3 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+    extern MuskToken yylex (void);
+    extern void reset_loc(void);
+
+#line 8 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -355,8 +360,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 34
-#define YY_END_OF_BUFFER 35
+#define YY_NUM_RULES 39
+#define YY_END_OF_BUFFER 40
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -364,21 +369,21 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[114] =
+static const flex_int16_t yy_accept[121] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,   35,   34,   33,   34,    3,    1,    2,    6,
-        4,    5,   11,   12,   10,    7,    8,   10,   16,   15,
-       13,   14,   25,   34,   24,   22,   23,   17,   18,   19,
-       21,   33,    0,    0,    0,    0,    0,    0,   11,   12,
-       10,   10,   16,   15,   25,   20,   24,    0,    0,    0,
-        0,    0,    0,   10,    0,    0,    0,    0,    0,    0,
-       10,    0,    0,    0,    0,    0,    0,    9,    0,    0,
-        0,   31,    0,    0,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,   26,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,   40,   39,   38,   39,
+        3,    1,    2,    6,    4,    5,   17,   18,   16,   13,
+       14,   16,    9,    7,    8,   12,   10,   11,   21,   19,
+       20,   30,   39,   29,   27,   28,   22,   23,   24,   26,
+       38,    0,    0,    0,    0,    0,    0,   17,   18,   16,
+       16,   30,   25,   29,    0,    0,    0,    0,    0,    0,
+       16,    0,    0,    0,    0,    0,    0,   16,    0,    0,
+        0,    0,    0,    0,   15,    0,    0,    0,   36,    0,
+        0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
 
-        0,    0,    0,   28,    0,   27,    0,    0,   29,    0,
-       32,   30,    0
+        0,    0,    0,   31,    0,    0,    0,    0,    0,    0,
+       33,    0,   32,    0,    0,   34,    0,   37,   35,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -387,7 +392,7 @@ static const YY_CHAR yy_ec[256] =
         4,    4,    2,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    2,    1,    1,    1,    5,    1,    1,    1,    1,
-        1,    1,    1,    1,    1,    1,    1,    6,    6,    6,
+        1,    1,    1,    4,    1,    1,    1,    6,    6,    6,
         6,    6,    6,    6,    6,    6,    6,    7,    8,    1,
         1,    1,    1,    9,    6,    6,    6,    6,    6,    6,
         6,    6,    6,    6,    6,    6,    6,    6,    6,    6,
@@ -415,110 +420,108 @@ static const YY_CHAR yy_ec[256] =
 
 static const YY_CHAR yy_meta[33] =
     {   0,
-        1,    2,    2,    2,    1,    3,    1,    1,    1,    1,
-        1,    3,    3,    3,    3,    3,    3,    3,    3,    3,
+        1,    2,    2,    2,    1,    3,    1,    1,    1,    2,
+        2,    3,    3,    3,    3,    3,    3,    3,    3,    3,
         3,    3,    3,    3,    3,    3,    3,    3,    3,    1,
         1,    1
     } ;
 
-static const flex_int16_t yy_base[121] =
+static const flex_int16_t yy_base[130] =
     {   0,
-        0,    2,    2,    4,    0,    1,   33,    0,   65,    0,
-       97,    0,  231,  232,    4,  114,  232,  232,  232,  232,
-      232,  232,    0,   14,  142,    0,    0,  174,   16,    0,
-      232,  232,   18,  225,    0,  232,  232,  232,  232,  232,
-      232,   20,  212,  206,  202,  199,  202,  197,    0,   22,
-      200,    6,   25,    0,  131,  232,    0,  207,  205,  194,
-      190,  182,  183,  114,  179,  178,  182,  171,  178,  173,
-      113,  180,  164,  163,  163,  167,  170,  164,  161,  164,
-      163,  232,  165,  149,  158,  153,  142,  121,  150,  140,
-      140,  147,  150,  134,  145,  143,  232,  137,  140,  134,
+        0,    2,    2,    4,    0,    1,   33,    0,    6,    8,
+       10,   12,   14,   16,   65,    0,  212,  213,    4,   82,
+      213,  213,  213,  213,  213,  213,    0,   26,  110,  213,
+      213,  142,  213,  213,  213,  213,  213,  213,  213,  213,
+      213,   99,  206,    0,  213,  213,  213,  213,  213,  213,
+      101,  193,  187,  183,  180,  183,  178,    0,  110,  181,
+      100,  119,  213,    0,  188,  187,  178,  187,  179,  179,
+       82,  173,  150,  154,  144,  151,  146,  102,  153,  136,
+      135,  135,  139,  142,  136,  133,  141,  141,  213,  143,
+      127,  140,  135,  121,  103,  128,  118,  118,  121,  124,
 
-      131,  133,  133,  232,  137,  232,  124,  119,  232,  113,
-      232,  232,  232,  206,  209,  212,  215,  218,    7,    5
+      108,  119,  117,  213,  111,  114,  108,  105,  106,  106,
+      213,  110,  213,   94,   88,  213,   81,  213,  213,  213,
+      174,  177,  180,  183,  186,  189,  192,  195,    5
     } ;
 
-static const flex_int16_t yy_def[121] =
+static const flex_int16_t yy_def[130] =
     {   0,
-      114,  114,  115,  115,  116,  116,  113,    7,  113,    9,
-      113,   11,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  117,  113,  118,  117,  117,  118,  113,  119,
-      113,  113,  113,  113,  120,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  117,  113,
-       28,   28,  113,  119,  113,  113,  120,  113,  113,  113,
-      113,  113,  113,   28,  113,  113,  113,  113,  113,  113,
-       28,  113,  113,  113,  113,  113,  113,   28,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
+      121,  121,  122,  122,  123,  123,  120,    7,  124,  124,
+      125,  125,  126,  126,  120,   15,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  127,  120,  128,  120,
+      120,  128,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  129,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  127,  120,   32,
+       32,  120,  120,  129,  120,  120,  120,  120,  120,  120,
+       32,  120,  120,  120,  120,  120,  120,   32,  120,  120,
+      120,  120,  120,  120,   32,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
 
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,    0,  113,  113,  113,  113,  113,  113,  113
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,    0,
+      120,  120,  120,  120,  120,  120,  120,  120,  120
     } ;
 
-static const flex_int16_t yy_nxt[265] =
+static const flex_int16_t yy_nxt[246] =
     {   0,
-      113,   15,   15,   15,   15,   42,   42,   57,   16,   54,
-       16,   18,   19,   18,   19,   50,   50,   53,   53,   55,
-       55,   42,   42,   50,   50,   64,   53,   53,   51,   21,
-       21,   22,   22,   23,   24,   24,   14,   23,   25,   23,
-       23,   23,   26,   27,   25,   25,   25,   25,   25,   25,
-       25,   25,   25,   25,   25,   25,   25,   25,   25,   28,
-       25,   25,   23,   23,   23,   14,   29,   29,   14,   14,
-       30,   14,   14,   14,   31,   32,   30,   30,   30,   30,
-       30,   30,   30,   30,   30,   30,   30,   30,   30,   30,
-       30,   30,   30,   30,   14,   14,   14,   14,   33,   33,
+      120,   19,   19,   19,   19,   51,   51,   64,   20,  120,
+       20,   22,   23,   22,   23,   34,   35,   34,   35,   37,
+       38,   37,   38,   40,   41,   40,   41,   59,   59,   25,
+       25,   26,   26,   27,   28,   28,   18,   27,   29,   27,
+       27,   27,   30,   31,   29,   29,   29,   29,   29,   29,
+       29,   29,   29,   29,   29,   29,   29,   29,   29,   32,
+       29,   29,   27,   27,   27,   18,   42,   42,   18,   43,
+       44,   45,   46,   18,   47,   48,   44,   44,   44,   44,
+       44,   44,   44,   44,   44,   44,   44,   44,   44,   44,
+       44,   44,   44,   44,   49,   50,   18,   52,   78,   53,
 
-       14,   34,   35,   36,   37,   14,   38,   39,   35,   35,
-       35,   35,   35,   35,   35,   35,   35,   35,   35,   35,
-       35,   35,   35,   35,   35,   35,   40,   41,   14,   43,
-       71,   44,   55,   55,   78,   51,   51,   45,  112,   46,
-       47,   48,   49,   93,  111,  110,   49,   94,   49,   49,
-       49,   49,   49,  109,  108,  107,  106,  105,  104,  103,
-      102,  101,  100,   99,   98,   97,   96,   95,   92,   91,
-       90,   49,   49,   49,   49,   89,   88,   87,   49,   86,
-       49,   49,   49,   49,   49,   85,   51,   84,   83,   82,
-       81,   80,   79,   77,   76,   75,   52,   74,   73,   72,
+       62,   62,   51,   51,   60,   54,  119,   55,   56,   57,
+       58,   59,   59,  118,   58,  117,   58,   58,   58,   71,
+       62,   62,   60,   85,   60,  100,  116,  115,  114,  101,
+      113,  112,  111,  110,  109,  108,  107,  106,  105,   58,
+       58,   58,   58,  104,  103,  102,   58,   99,   58,   58,
+       58,   98,   97,   96,   95,   94,   93,   92,   60,   91,
+       90,   89,   88,   87,   61,   86,   84,   83,   82,   81,
+       80,   58,   58,   58,   18,   18,   18,   21,   21,   21,
+       24,   24,   24,   33,   33,   33,   36,   36,   36,   39,
+       39,   39,   58,   79,   58,   60,   77,   60,   76,   75,
 
-       70,   69,   68,   49,   49,   49,   14,   14,   14,   17,
-       17,   17,   20,   20,   20,   49,   67,   49,   51,   66,
-       51,   65,   51,   63,   62,   61,   60,   59,   58,   56,
-      113,   13,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113
+       74,   73,   72,   60,   70,   69,   68,   67,   66,   65,
+       63,  120,   17,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120
     } ;
 
-static const flex_int16_t yy_chk[265] =
+static const flex_int16_t yy_chk[246] =
     {   0,
-        0,    1,    1,    2,    2,   15,   15,  120,    1,  119,
-        2,    3,    3,    4,    4,   24,   24,   29,   29,   33,
-       33,   42,   42,   50,   50,   52,   53,   53,   52,    5,
+        0,    1,    1,    2,    2,   19,   19,  129,    1,    0,
+        2,    3,    3,    4,    4,    9,    9,   10,   10,   11,
+       11,   12,   12,   13,   13,   14,   14,   28,   28,    5,
         6,    5,    6,    7,    7,    7,    7,    7,    7,    7,
         7,    7,    7,    7,    7,    7,    7,    7,    7,    7,
         7,    7,    7,    7,    7,    7,    7,    7,    7,    7,
-        7,    7,    7,    7,    7,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
-        9,    9,    9,    9,    9,    9,    9,   11,   11,   11,
+        7,    7,    7,    7,    7,   15,   15,   15,   15,   15,
+       15,   15,   15,   15,   15,   15,   15,   15,   15,   15,
+       15,   15,   15,   15,   15,   15,   15,   15,   15,   15,
+       15,   15,   15,   15,   15,   15,   15,   20,   71,   20,
 
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   11,
-       11,   11,   11,   11,   11,   11,   11,   11,   11,   16,
-       64,   16,   55,   55,   71,   71,   64,   16,  110,   16,
-       16,   16,   25,   88,  108,  107,   25,   88,   25,   25,
-       25,   25,   25,  105,  103,  102,  101,  100,   99,   98,
-       96,   95,   94,   93,   92,   91,   90,   89,   87,   86,
-       85,   25,   25,   25,   28,   84,   83,   81,   28,   80,
-       28,   28,   28,   28,   28,   79,   78,   77,   76,   75,
-       74,   73,   72,   70,   69,   68,   28,   67,   66,   65,
+       42,   42,   51,   51,   71,   20,  117,   20,   20,   20,
+       29,   59,   59,  115,   29,  114,   29,   29,   29,   61,
+       62,   62,   61,   78,   78,   95,  112,  110,  109,   95,
+      108,  107,  106,  105,  103,  102,  101,  100,   99,   29,
+       29,   29,   32,   98,   97,   96,   32,   94,   32,   32,
+       32,   93,   92,   91,   90,   88,   87,   86,   85,   84,
+       83,   82,   81,   80,   32,   79,   77,   76,   75,   74,
+       73,   32,   32,   32,  121,  121,  121,  122,  122,  122,
+      123,  123,  123,  124,  124,  124,  125,  125,  125,  126,
+      126,  126,  127,   72,  127,  128,   70,  128,   69,   68,
 
-       63,   62,   61,   28,   28,   28,  114,  114,  114,  115,
-      115,  115,  116,  116,  116,  117,   60,  117,  118,   59,
-      118,   58,   51,   48,   47,   46,   45,   44,   43,   34,
-       13,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113,  113,  113,  113,  113,  113,  113,
-      113,  113,  113,  113
+       67,   66,   65,   60,   57,   56,   55,   54,   53,   52,
+       43,   17,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120,  120,  120,  120,  120,  120,
+      120,  120,  120,  120,  120
     } ;
 
 static yy_state_type yy_last_accepting_state;
@@ -536,23 +539,32 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "assets/lexer.l"
-/*
 
-    LITTLE FUN FACT !!!!
-    IF YOU WANT A LEXER THAT COMPILES IN CPP USING FLEX
-    ALTHOUGH THERE IS OPTION C++ YOU SHOULD NEVER USE IT HAHAHAHA
-    SO WHY THE FUCK DOES IT EXIST
-
-    WORKING WITH FLEX AGAIN MAKES ME REALISE HOW FUCKED THIS SOFTWARE IS
-    NOW IM MORE MOTIVATED TO ACTUALLY WRITE A LEXER THAT IS SOMEWHAT FUCKING USABLE
-    
-*/
-#line 17 "assets/lexer.l"
-    #include "musk_tokens.hpp"
+#line 14 "assets/lexer.l"
     #include <stack>
 
-    #define YY_DECL MuskToken yylex()
-    #define mtt MuskTokenType
+    static Location loc;
+
+    // reset for testing
+    void reset_loc(){
+        loc = {0,0};
+    }
+
+    void update_loc(const std::string& yytext){
+        for (int i = 0; i < yytext.length(); i++){
+            if (yytext[i] == '\n'){
+                loc.col = 0;
+                loc.line++;
+            }
+            else loc.col++;
+        }
+    }
+
+    Location post_update(const std::string& yytext){
+        Location old_loc = loc;
+        update_loc(yytext);
+        return old_loc;
+    }
 
     std::stack<int> bracket_count;
     std::string strbuf;
@@ -588,20 +600,18 @@ char *yytext;
             ": " + msg + " (near \"" + text_snippet + "\")"
         );
     }
-#line 591 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
-/* MUSK_BLOCK, anything inside of a non-prod muskblock will be user defined code, just return this as a string in a block token */ 
-/* PROD_BLOCK, prod blocks may contain a production which will be followed by user defined code 
-    return this as a token indicator of PROD_BLOCK and follow with prod tokens or code blocks */ 
-/* CODE_BLOCK, when in a prod block we can enter a code block which is indicated by an occurence of '{' token */ 
-
-#line 597 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+#line 603 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+ 
+#line 605 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 #define INITIAL 0
 #define MUSK_BLOCK_S 1
 #define CODE_BLOCK_S 2
 #define DECL_BLOCK_S 3
-#define START_BLOCK_S 4
-#define PROD_BLOCK_S 5
+#define TOK_O_BLOCK_S 4
+#define TOK_T_BLOCK_S 5
+#define START_BLOCK_S 6
+#define PROD_BLOCK_S 7
 
 #ifndef YY_NO_UNISTD_H
 /* Special case for "unistd.h", since it is non-ANSI. We include it way
@@ -826,9 +836,9 @@ YY_DECL
 		}
 
 	{
-#line 70 "assets/lexer.l"
+#line 85 "assets/lexer.l"
 
-#line 831 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+#line 841 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -855,13 +865,13 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 114 )
+				if ( yy_current_state >= 121 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 232 );
+		while ( yy_base[yy_current_state] != 213 );
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
@@ -887,18 +897,24 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 72 "assets/lexer.l"
-{ bracket_incr(); }
+#line 87 "assets/lexer.l"
+{
+        update_loc(yytext);
+        bracket_incr(); 
+    }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 73 "assets/lexer.l"
-{ 
+#line 91 "assets/lexer.l"
+{
+        Location l = loc;
+
         int bc = bracket_decr();
+        update_loc(yytext);
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf);
+            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, l);
             strbuf.clear();
             return tok;
         }
@@ -907,25 +923,34 @@ YY_RULE_SETUP
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 83 "assets/lexer.l"
-{ strbuf.append(yytext); }
+#line 104 "assets/lexer.l"
+{
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
 	YY_BREAK
 
 
 case 4:
 YY_RULE_SETUP
-#line 87 "assets/lexer.l"
-{ bracket_incr(); }
+#line 111 "assets/lexer.l"
+{
+        update_loc(yytext);
+        bracket_incr(); 
+    }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 88 "assets/lexer.l"
-{ 
+#line 115 "assets/lexer.l"
+{
+        Location l = loc;
+
+        update_loc(yytext); 
         int bc = bracket_decr();
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf);
+            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, l);
             strbuf.clear();
             return tok;
         }
@@ -937,70 +962,108 @@ YY_RULE_SETUP
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 101 "assets/lexer.l"
-{ strbuf.append(yytext); }
+#line 131 "assets/lexer.l"
+{ 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
 	YY_BREAK
 
 
 case 7:
 YY_RULE_SETUP
-#line 105 "assets/lexer.l"
+#line 138 "assets/lexer.l"
 {
+        update_loc(yytext);
+        int bc = bracket_incr();
+        if (bc > 1) {
+            error("illegal nested block declarations in @tok_obj/@tok_type", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 8:
+YY_RULE_SETUP
+#line 145 "assets/lexer.l"
+{
+        Location l = loc;
+        update_loc(yytext);
+        int bc = bracket_decr();
+
+        if (bc == 0) {
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_TOK_OBJ, strbuf, l);
+        }
+        if (bc < 0){
+            error("illegal close of missing tok declaration", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 9:
+/* rule 9 can match eol */
+YY_RULE_SETUP
+#line 158 "assets/lexer.l"
+{ 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
+	YY_BREAK
+
+
+case 10:
+YY_RULE_SETUP
+#line 165 "assets/lexer.l"
+{
+        update_loc(yytext);
+        int bc = bracket_incr();
+        if (bc > 1) {
+            error("illegal nested block declarations in @tok_obj/@tok_type", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 11:
+YY_RULE_SETUP
+#line 172 "assets/lexer.l"
+{
+        Location l = loc;
+        update_loc(yytext);
+        int bc = bracket_decr();
+
+        if (bc == 0) {
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_TOK_TYPE, strbuf, l);
+        }
+        if (bc < 0){
+            error("illegal close of missing tok declaration", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 12:
+/* rule 12 can match eol */
+YY_RULE_SETUP
+#line 185 "assets/lexer.l"
+{ 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
+	YY_BREAK
+
+
+case 13:
+YY_RULE_SETUP
+#line 192 "assets/lexer.l"
+{
+        update_loc(yytext);
         int bc = bracket_incr();
         if (bc > 1) {
             error("illegal nested block declarations in @declarations", yytext, yylineno);
         }
     }
 	YY_BREAK
-case 8:
-YY_RULE_SETUP
-#line 111 "assets/lexer.l"
-{
-        int bc = bracket_decr();
-
-        if (bc == 0) yy_pop_state();
-        if (bc < 0){
-            error("illegal close of missing block declaration", yytext, yylineno);
-        }
-    }
-	YY_BREAK
-case 9:
-YY_RULE_SETUP
-#line 120 "assets/lexer.l"
-{ return MuskToken(mtt::TOK_DECL); }
-	YY_BREAK
-case 10:
-YY_RULE_SETUP
-#line 121 "assets/lexer.l"
-{ return MuskToken(mtt::TERM_DECL, yytext); }
-	YY_BREAK
-case 11:
-YY_RULE_SETUP
-#line 122 "assets/lexer.l"
-{ return MuskToken(mtt::TYPE_DECL, yytext); }
-	YY_BREAK
-case 12:
-/* rule 12 can match eol */
-YY_RULE_SETUP
-#line 123 "assets/lexer.l"
-{ /* skip whitespace */ }
-	YY_BREAK
-
-
-case 13:
-YY_RULE_SETUP
-#line 127 "assets/lexer.l"
-{
-        int bc = bracket_incr();
-        if (bc > 1) {
-            error("illegal nested block declarations in @start", yytext, yylineno);
-        }
-    }
-	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 133 "assets/lexer.l"
+#line 199 "assets/lexer.l"
 {
+        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0) yy_pop_state();
@@ -1011,31 +1074,82 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 141 "assets/lexer.l"
-{ return MuskToken(mtt::TERM_DECL, yytext); }
+#line 209 "assets/lexer.l"
+{ return MuskToken(mtt::TOK_DECL, post_update(yytext)); }
 	YY_BREAK
 case 16:
-/* rule 16 can match eol */
 YY_RULE_SETUP
-#line 142 "assets/lexer.l"
-{ /* skip whitespace */ }
+#line 210 "assets/lexer.l"
+{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+	YY_BREAK
+case 17:
+YY_RULE_SETUP
+#line 211 "assets/lexer.l"
+{ return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext)); }
+	YY_BREAK
+case 18:
+/* rule 18 can match eol */
+YY_RULE_SETUP
+#line 212 "assets/lexer.l"
+{ update_loc(yytext); }
 	YY_BREAK
 
 
-case 17:
+case 19:
 YY_RULE_SETUP
-#line 146 "assets/lexer.l"
+#line 216 "assets/lexer.l"
 {
+        update_loc(yytext);
+        int bc = bracket_incr();
+        if (bc > 1) {
+            error("illegal nested block declarations in @start", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 20:
+YY_RULE_SETUP
+#line 223 "assets/lexer.l"
+{
+        Location l = loc;
+        update_loc(yytext);
+        int bc = bracket_decr();
+
+        if (bc == 0){
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_START, strbuf, l);    
+        }
+        if (bc < 0){
+            error("illegal close of missing block declaration", yytext, yylineno);
+        }
+    }
+	YY_BREAK
+case 21:
+/* rule 21 can match eol */
+YY_RULE_SETUP
+#line 236 "assets/lexer.l"
+{ 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
+	YY_BREAK
+
+
+case 22:
+YY_RULE_SETUP
+#line 243 "assets/lexer.l"
+{
+        update_loc(yytext);
         int bc = bracket_incr();
         if (bc > 1) {
             error("illegal nested block declarations in @productions", yytext, yylineno);
         }
     }
 	YY_BREAK
-case 18:
+case 23:
 YY_RULE_SETUP
-#line 152 "assets/lexer.l"
+#line 250 "assets/lexer.l"
 {
+        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0) yy_pop_state();
@@ -1044,118 +1158,121 @@ YY_RULE_SETUP
         }
     }
 	YY_BREAK
-case 19:
+case 24:
 YY_RULE_SETUP
-#line 161 "assets/lexer.l"
+#line 260 "assets/lexer.l"
 {
+        update_loc(yytext);
         bracket_nest();
         bracket_incr();
         yy_push_state(CODE_BLOCK_S);
     }
 	YY_BREAK
-case 20:
-YY_RULE_SETUP
-#line 167 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_EOF); }
-	YY_BREAK
-case 21:
-YY_RULE_SETUP
-#line 168 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_SUM); }
-	YY_BREAK
-case 22:
-YY_RULE_SETUP
-#line 169 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_SEP); }
-	YY_BREAK
-case 23:
-YY_RULE_SETUP
-#line 170 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_END); }
-	YY_BREAK
-case 24:
-YY_RULE_SETUP
-#line 171 "assets/lexer.l"
-{ return MuskToken(mtt::TERM_DECL, yytext); }
-	YY_BREAK
 case 25:
-/* rule 25 can match eol */
 YY_RULE_SETUP
-#line 172 "assets/lexer.l"
-{ /* skip whitespace */ }
+#line 267 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_EOF, post_update(yytext)); }
 	YY_BREAK
-
 case 26:
 YY_RULE_SETUP
-#line 175 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES); }
+#line 268 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_SUM, post_update(yytext)); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 176 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS); }
+#line 269 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_SEP, post_update(yytext)); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 177 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_TOK_OBJ); }
+#line 270 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_END, post_update(yytext)); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 178 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_TOK_TYPE); }
+#line 271 "assets/lexer.l"
+{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
 	YY_BREAK
 case 30:
+/* rule 30 can match eol */
 YY_RULE_SETUP
-#line 179 "assets/lexer.l"
-{ yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL); }
+#line 272 "assets/lexer.l"
+{ update_loc(yytext); }
 	YY_BREAK
+
 case 31:
 YY_RULE_SETUP
-#line 180 "assets/lexer.l"
-{ yy_push_state(START_BLOCK_S); return MuskToken(mtt::SECTION_START); }
+#line 275 "assets/lexer.l"
+{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext)); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 181 "assets/lexer.l"
-{ yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD); }
+#line 276 "assets/lexer.l"
+{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext)); }
 	YY_BREAK
 case 33:
-/* rule 33 can match eol */
 YY_RULE_SETUP
-#line 182 "assets/lexer.l"
-{ /* skip whitespace */ }
-	YY_BREAK
-case YY_STATE_EOF(MUSK_BLOCK_S):
-#line 184 "assets/lexer.l"
-{ error("illegal unclosed musk block", yytext, yylineno); }
-	YY_BREAK
-case YY_STATE_EOF(CODE_BLOCK_S):
-#line 185 "assets/lexer.l"
-{ error("illegal unclosed code block", yytext, yylineno); }
-	YY_BREAK
-case YY_STATE_EOF(DECL_BLOCK_S):
-#line 186 "assets/lexer.l"
-{ error("illegal unclosed declaration block", yytext, yylineno); }
-	YY_BREAK
-case YY_STATE_EOF(START_BLOCK_S):
-#line 187 "assets/lexer.l"
-{ error("illegal unclosed start block", yytext, yylineno); }
-	YY_BREAK
-case YY_STATE_EOF(PROD_BLOCK_S):
-#line 188 "assets/lexer.l"
-{ error("illegal unclosed production block", yytext, yylineno); }
-	YY_BREAK
-case YY_STATE_EOF(INITIAL):
-#line 189 "assets/lexer.l"
-{ return MuskToken(mtt::MUSK_EOF); }
+#line 277 "assets/lexer.l"
+{ yy_push_state(TOK_O_BLOCK_S); update_loc(yytext); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 190 "assets/lexer.l"
+#line 278 "assets/lexer.l"
+{ yy_push_state(TOK_T_BLOCK_S); update_loc(yytext); }
+	YY_BREAK
+case 35:
+YY_RULE_SETUP
+#line 279 "assets/lexer.l"
+{ yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext)); }
+	YY_BREAK
+case 36:
+YY_RULE_SETUP
+#line 280 "assets/lexer.l"
+{ yy_push_state(START_BLOCK_S); update_loc(yytext); }
+	YY_BREAK
+case 37:
+YY_RULE_SETUP
+#line 281 "assets/lexer.l"
+{ yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext)); }
+	YY_BREAK
+case 38:
+/* rule 38 can match eol */
+YY_RULE_SETUP
+#line 282 "assets/lexer.l"
+{ update_loc(yytext); }
+	YY_BREAK
+case YY_STATE_EOF(MUSK_BLOCK_S):
+#line 284 "assets/lexer.l"
+{ error("illegal unclosed musk block", yytext, yylineno); }
+	YY_BREAK
+case YY_STATE_EOF(CODE_BLOCK_S):
+#line 285 "assets/lexer.l"
+{ error("illegal unclosed code block", yytext, yylineno); }
+	YY_BREAK
+case YY_STATE_EOF(DECL_BLOCK_S):
+#line 286 "assets/lexer.l"
+{ error("illegal unclosed declaration block", yytext, yylineno); }
+	YY_BREAK
+case YY_STATE_EOF(START_BLOCK_S):
+#line 287 "assets/lexer.l"
+{ error("illegal unclosed start block", yytext, yylineno); }
+	YY_BREAK
+case YY_STATE_EOF(PROD_BLOCK_S):
+#line 288 "assets/lexer.l"
+{ error("illegal unclosed production block", yytext, yylineno); }
+	YY_BREAK
+case YY_STATE_EOF(INITIAL):
+case YY_STATE_EOF(TOK_O_BLOCK_S):
+case YY_STATE_EOF(TOK_T_BLOCK_S):
+#line 289 "assets/lexer.l"
+{ return MuskToken(mtt::MUSK_EOF, loc); }
+	YY_BREAK
+case 39:
+YY_RULE_SETUP
+#line 290 "assets/lexer.l"
 ECHO;
 	YY_BREAK
-#line 1158 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+#line 1275 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1450,7 +1567,7 @@ static int yy_get_next_buffer (void)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 114 )
+			if ( yy_current_state >= 121 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1478,11 +1595,11 @@ static int yy_get_next_buffer (void)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 114 )
+		if ( yy_current_state >= 121 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 113);
+	yy_is_jam = (yy_current_state == 120);
 
 		return yy_is_jam ? 0 : yy_current_state;
 }
@@ -2204,5 +2321,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 190 "assets/lexer.l"
+#line 290 "assets/lexer.l"
 

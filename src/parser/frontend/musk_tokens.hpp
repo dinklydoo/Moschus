@@ -2,11 +2,18 @@
 #include <string>
 #include <vector>
 
+#define mtt MuskTokenType
+
 struct MuskToken;
 enum class MuskTokenType;
 
 using MuskTokenStream = std::vector<MuskToken>;
 using MuskTTypeStream = std::vector<MuskTokenType>;
+
+struct Location {
+    int line;
+    int col;
+};
 
 enum class MuskTokenType {
     SECTION_INCLUDES, // @includes
@@ -37,4 +44,10 @@ enum class MuskTokenType {
 struct MuskToken {
     MuskTokenType type;
     std::string internal;
+
+    Location loc;
+
+    MuskToken() = default;
+    MuskToken(mtt type, Location loc) : type(type), loc(loc) {}
+    MuskToken(mtt type, std::string strbuf, Location loc) : type(type), internal(strbuf), loc(loc) {}
 };

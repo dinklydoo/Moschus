@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
-#include "../src/parser/frontend/musk_lexer.cpp"
+#include "../src/parser/frontend/musk_lexer.hpp"
+#include "../src/parser/frontend/musk_tokens.hpp"
 
 TEST(LEXER, MUSK_FILE){
     yyin = fopen("tests/assets/example.musk", "r");
@@ -19,9 +20,7 @@ TEST(LEXER, MUSK_FILE){
         mtt::SECTION_UTILS,
         mtt::MUSK_BLOCK,
         mtt::SECTION_TOK_OBJ,
-        mtt::MUSK_BLOCK,
         mtt::SECTION_TOK_TYPE,
-        mtt::MUSK_BLOCK,
         mtt::SECTION_DECL,
         mtt::TOK_DECL, // INT
         mtt::TERM_DECL,
@@ -44,7 +43,6 @@ TEST(LEXER, MUSK_FILE){
         mtt::TYPE_DECL, // DIV_EXP
         mtt::TERM_DECL,
         mtt::SECTION_START,
-        mtt::TERM_DECL,
         mtt::SECTION_PROD,
         mtt::TERM_DECL, // CALC_EXP prod
         mtt::PROD_SEP,

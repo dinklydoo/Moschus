@@ -19,24 +19,33 @@ FLEX_TARGET(
     Lexer
     assets/lexer.l
     ${CMAKE_CURRENT_BINARY_DIR}/../src/parser/frontend/musk_lexer.cpp
+    DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/../src/parser/frontend/musk_lexer.hpp
+)
+
+add_library(moschus_lib
+    src/musk_template.cpp
+    src/parser/frontend/musk_error.cpp
+    src/parser/frontend/musk_parser.cpp
+    ${FLEX_Lexer_OUTPUTS}
 )
 
 add_executable(${PROJECT_NAME}
     src/moschus.cpp
-    src/musk_template.cpp
-    ${FLEX_Lexer_OUTPUTS}
 )
 
 add_executable(tests
-    tests/lexer_test.cpp
+    tests/musklex_test.cpp
+    tests/muskparse_test.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE argparse::argparse
+    PRIVATE moschus_lib
 )
 
 target_link_libraries(tests
     PRIVATE GTest::gtest_main
+    PRIVATE moschus_lib
 )
 
 target_include_directories(${PROJECT_NAME} PRIVATE

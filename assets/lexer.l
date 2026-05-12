@@ -1,24 +1,40 @@
+%option header-file="src/parser/frontend/musk_lexer.hpp"
 %option noyywrap
 %option stack
 
-/*
+%top{
+    #include "musk_tokens.hpp"
+    #define YY_DECL MuskToken yylex()
 
-    LITTLE FUN FACT !!!!
-    IF YOU WANT A LEXER THAT COMPILES IN CPP USING FLEX
-    ALTHOUGH THERE IS OPTION C++ YOU SHOULD NEVER USE IT HAHAHAHA
-    SO WHY THE FUCK DOES IT EXIST
-
-    WORKING WITH FLEX AGAIN MAKES ME REALISE HOW FUCKED THIS SOFTWARE IS
-    NOW IM MORE MOTIVATED TO ACTUALLY WRITE A LEXER THAT IS SOMEWHAT FUCKING USABLE
-    
-*/
+    extern MuskToken yylex (void);
+    extern void reset_loc(void);
+}
 
 %{
-    #include "musk_tokens.hpp"
     #include <stack>
 
-    #define YY_DECL MuskToken yylex()
-    #define mtt MuskTokenType
+    static Location loc;
+
+    // reset for testing
+    void reset_loc(){
+        loc = {0,0};
+    }
+
+    void update_loc(const std::string& yytext){
+        for (int i = 0; i < yytext.length(); i++){
+            if (yytext[i] == '\n'){
+                loc.col = 0;
+                loc.line++;
+            }
+            else loc.col++;
+        }
+    }
+
+    Location post_update(const std::string& yytext){
+        Location old_loc = loc;
+        update_loc(yytext);
+        return old_loc;
+    }
 
     std::stack<int> bracket_count;
     std::string strbuf;
@@ -58,39 +74,53 @@
 
 MuskToken yylex();
 
-/* MUSK_BLOCK, anything inside of a non-prod muskblock will be user defined code, just return this as a string in a block token */ 
-
-/* PROD_BLOCK, prod blocks may contain a production which will be followed by user defined code 
-    return this as a token indicator of PROD_BLOCK and follow with prod tokens or code blocks */ 
-
-/* CODE_BLOCK, when in a prod block we can enter a code block which is indicated by an occurence of '{' token */ 
-
-%x MUSK_BLOCK_S CODE_BLOCK_S DECL_BLOCK_S START_BLOCK_S PROD_BLOCK_S
+%x MUSK_BLOCK_S 
+%x CODE_BLOCK_S 
+%x DECL_BLOCK_S 
+%x TOK_O_BLOCK_S
+%x TOK_T_BLOCK_S
+%x START_BLOCK_S
+%x PROD_BLOCK_S
 
 %%
 <MUSK_BLOCK_S>{
-    "[" { bracket_incr(); }
-    "]" { 
+    "[" {
+        update_loc(yytext);
+        bracket_incr(); 
+    }
+    "]" {
+        Location l = loc;
+
         int bc = bracket_decr();
+        update_loc(yytext);
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf);
+            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, l);
             strbuf.clear();
             return tok;
         }
     }
-    (.|\n) { strbuf.append(yytext); }
+    (.|\n) {
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
 }
 
 <CODE_BLOCK_S>{
-    "{" { bracket_incr(); }
-    "}" { 
+    "{" {
+        update_loc(yytext);
+        bracket_incr(); 
+    }
+    "}" {
+        Location l = loc;
+
+        update_loc(yytext); 
         int bc = bracket_decr();
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf);
+            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, l);
             strbuf.clear();
             return tok;
         }
@@ -98,17 +128,76 @@ MuskToken yylex();
             error("illegal close of missing block declaration", yytext, yylineno);
         }
     }
-    (.|\n) { strbuf.append(yytext); }
+    (.|\n) { 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
+}
+
+<TOK_O_BLOCK_S>{
+    "[" {
+        update_loc(yytext);
+        int bc = bracket_incr();
+        if (bc > 1) {
+            error("illegal nested block declarations in @tok_obj/@tok_type", yytext, yylineno);
+        }
+    }
+    "]" {
+        Location l = loc;
+        update_loc(yytext);
+        int bc = bracket_decr();
+
+        if (bc == 0) {
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_TOK_OBJ, strbuf, l);
+        }
+        if (bc < 0){
+            error("illegal close of missing tok declaration", yytext, yylineno);
+        }
+    }
+    (.|\n) { 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
+}
+
+<TOK_T_BLOCK_S>{
+    "[" {
+        update_loc(yytext);
+        int bc = bracket_incr();
+        if (bc > 1) {
+            error("illegal nested block declarations in @tok_obj/@tok_type", yytext, yylineno);
+        }
+    }
+    "]" {
+        Location l = loc;
+        update_loc(yytext);
+        int bc = bracket_decr();
+
+        if (bc == 0) {
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_TOK_TYPE, strbuf, l);
+        }
+        if (bc < 0){
+            error("illegal close of missing tok declaration", yytext, yylineno);
+        }
+    }
+    (.|\n) { 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
 }
 
 <DECL_BLOCK_S>{
     "[" {
+        update_loc(yytext);
         int bc = bracket_incr();
         if (bc > 1) {
             error("illegal nested block declarations in @declarations", yytext, yylineno);
         }
     }
     "]" {
+        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0) yy_pop_state();
@@ -117,39 +206,49 @@ MuskToken yylex();
         }
     }
 
-    "token"                     { return MuskToken(mtt::TOK_DECL); }
-    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext); }
-    [^[:space:]]+               { return MuskToken(mtt::TYPE_DECL, yytext); }
-    [ \t\n\r]+                  { /* skip whitespace */ }
+    "token"                         { return MuskToken(mtt::TOK_DECL, post_update(yytext)); }
+    [a-zA-Z0-9_][a-zA-Z0-9_]*       { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+    [^[:space:],\[\]]+              { return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext)); }
+    [ \t\n\r]+                      { update_loc(yytext); }
 }
 
 <START_BLOCK_S>{
     "[" {
+        update_loc(yytext);
         int bc = bracket_incr();
         if (bc > 1) {
             error("illegal nested block declarations in @start", yytext, yylineno);
         }
     }
     "]" {
+        Location l = loc;
+        update_loc(yytext);
         int bc = bracket_decr();
 
-        if (bc == 0) yy_pop_state();
+        if (bc == 0){
+            yy_pop_state();
+            return MuskToken(mtt::SECTION_START, strbuf, l);    
+        }
         if (bc < 0){
             error("illegal close of missing block declaration", yytext, yylineno);
         }
     }
-    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext); }
-    [ \t\n\r]+                  { /* skip whitespace */ }
+    (.|\n) { 
+        strbuf.append(yytext);
+        update_loc(yytext);
+    }
 }
 
 <PROD_BLOCK_S>{
     "[" {
+        update_loc(yytext);
         int bc = bracket_incr();
         if (bc > 1) {
             error("illegal nested block declarations in @productions", yytext, yylineno);
         }
     }
     "]" {
+        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0) yy_pop_state();
@@ -159,32 +258,33 @@ MuskToken yylex();
     }
 
     "{" {
+        update_loc(yytext);
         bracket_nest();
         bracket_incr();
         yy_push_state(CODE_BLOCK_S);
     }
 
-    "$$"                        { return MuskToken(mtt::PROD_EOF); }
-    "|"                         { return MuskToken(mtt::PROD_SUM); }
-    ":"                         { return MuskToken(mtt::PROD_SEP); }
-    ";"                         { return MuskToken(mtt::PROD_END); }
-    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext); }
-    [ \t\n\r]+                  { /* skip whitespace */ }
+    "$$"                        { return MuskToken(mtt::PROD_EOF, post_update(yytext)); }
+    "|"                         { return MuskToken(mtt::PROD_SUM, post_update(yytext)); }
+    ":"                         { return MuskToken(mtt::PROD_SEP, post_update(yytext)); }
+    ";"                         { return MuskToken(mtt::PROD_END, post_update(yytext)); }
+    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+    [ \t\n\r]+                  { update_loc(yytext); }
 }
 
-"@includes"         { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES); }
-"@utilities"        { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS); }
-"@token_obj"        { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_TOK_OBJ); }
-"@token_type"       { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_TOK_TYPE); }
-"@declarations"     { yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL); }
-"@start"            { yy_push_state(START_BLOCK_S); return MuskToken(mtt::SECTION_START); }
-"@productions"       { yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD); }
-[ \t\n\r]+          { /* skip whitespace */ }
+"@includes"         { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext)); }
+"@utilities"        { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext)); }
+"@token_obj"        { yy_push_state(TOK_O_BLOCK_S); update_loc(yytext); }
+"@token_type"       { yy_push_state(TOK_T_BLOCK_S); update_loc(yytext); }
+"@declarations"     { yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext)); }
+"@start"            { yy_push_state(START_BLOCK_S); update_loc(yytext); }
+"@productions"      { yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext)); }
+[ \t\n\r]+          { update_loc(yytext); }
 
 <MUSK_BLOCK_S><<EOF>>   { error("illegal unclosed musk block", yytext, yylineno); }
 <CODE_BLOCK_S><<EOF>>   { error("illegal unclosed code block", yytext, yylineno); }
 <DECL_BLOCK_S><<EOF>>   { error("illegal unclosed declaration block", yytext, yylineno); }
 <START_BLOCK_S><<EOF>>  { error("illegal unclosed start block", yytext, yylineno); }
 <PROD_BLOCK_S><<EOF>>   { error("illegal unclosed production block", yytext, yylineno); }
-<<EOF>>                 { return MuskToken(mtt::MUSK_EOF); }
+<<EOF>>                 { return MuskToken(mtt::MUSK_EOF, loc); }
 %%
