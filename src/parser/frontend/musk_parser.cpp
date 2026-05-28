@@ -10,7 +10,7 @@
 
     As the structure is mostly linear with the only
     caveat being Productions which can contain
-    a linear set of production rules,
+    an internal linear set of production rules,
 
     we must also manually extract production sum types
     as an individual production
@@ -49,22 +49,23 @@ void stabilise(tok_it& it, tok_it end){
 // define our error macro to automatically stabilise after detecting an error
 #define push_error(it, end, msg)\
     errors.push_back(\
-        MuskError(msg, it->loc)\
+        MuskError(msg, it->start_loc, it->end_loc)\
     );\
     stabilise(it, end)
 
 #define push_warning(it, end, msg)\
     warnings.push_back(\
-        MuskWarning(msg, it->loc)\
+        MuskWarning(msg, it->start_loc, it->end_loc)\
     )
-
 
 /*
     Main API to the musk parser,
-    recursive descent with some decent error handling
+    recursive descent with some "decent" error handling
     and recovery
 */
 musk_ptr parse_musk(const MuskTokenStream& toks){
+    errors.clear();
+    warnings.clear();
 
     // with const vector we can safely pass the iterator as we consume tokens
     tok_it it = toks.begin();
@@ -140,6 +141,9 @@ TokenProperties parse_token_p(tok_it& it, tok_it end){
                 return token_p;
             }
             token_p.token_object = it->internal;
+            if (token_p.token_object.empty()){
+                push_error(it, end, "Token object type is not defined, ensure @token_obj is defined");
+            }
             tok_it_incr(it, end, token_p);
         }
         else if (it->type == mtt::SECTION_TOK_TYPE){
@@ -148,15 +152,12 @@ TokenProperties parse_token_p(tok_it& it, tok_it end){
                 return token_p;
             }
             token_p.token_type = it->internal;
+            if (token_p.token_type.empty()){
+                push_error(it, end, "Token identifier type is not defined, ensure @token_type is defined");
+            }
             tok_it_incr(it, end, token_p);
         }
         else break;
-    }
-    if (token_p.token_object.empty()){
-        push_error(it, end, "Token object type is not defined, ensure @token_obj is defined");
-    }
-    if (token_p.token_type.empty()){
-        push_error(it, end, "Token identifier type is not defined, ensure @token_type is defined");
     }
     return token_p;
 }

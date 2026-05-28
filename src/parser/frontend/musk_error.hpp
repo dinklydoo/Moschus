@@ -11,14 +11,15 @@ using musk_warnings = std::vector<MuskWarning>;
 
 struct MuskError {
     std::string msg;
-    Location loc;
+    Location start_loc;
+    Location end_loc;
 };
 
 struct MuskWarning {
     std::string msg;
-    Location loc;
+    Location start_loc;
+    Location end_loc;
 };
-
 
 void eof_error(musk_errors& err);
 

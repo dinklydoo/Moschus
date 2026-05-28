@@ -544,16 +544,18 @@ char *yytext;
     #include <stack>
 
     static Location loc;
+    static Location pin_loc;
 
     // reset for testing
     void reset_loc(){
-        loc = {0,0};
+        loc = {1,1};
+        pin_loc = {1,1};
     }
 
     void update_loc(const std::string& yytext){
         for (int i = 0; i < yytext.length(); i++){
             if (yytext[i] == '\n'){
-                loc.col = 0;
+                loc.col = 1;
                 loc.line++;
             }
             else loc.col++;
@@ -600,9 +602,9 @@ char *yytext;
             ": " + msg + " (near \"" + text_snippet + "\")"
         );
     }
-#line 603 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
- 
 #line 605 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+ 
+#line 607 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 #define INITIAL 0
 #define MUSK_BLOCK_S 1
@@ -836,9 +838,9 @@ YY_DECL
 		}
 
 	{
-#line 85 "assets/lexer.l"
+#line 87 "assets/lexer.l"
 
-#line 841 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+#line 843 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -897,15 +899,16 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 87 "assets/lexer.l"
+#line 89 "assets/lexer.l"
 {
+        pin_loc = loc;
         update_loc(yytext);
         bracket_incr(); 
     }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 91 "assets/lexer.l"
+#line 94 "assets/lexer.l"
 {
         Location l = loc;
 
@@ -914,16 +917,19 @@ YY_RULE_SETUP
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, l);
+            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, pin_loc, l);
             strbuf.clear();
             return tok;
+        }
+        else if (bc < 0){
+            error("illegal close of missing block declaration", yytext, yylineno);
         }
     }
 	YY_BREAK
 case 3:
 /* rule 3 can match eol */
 YY_RULE_SETUP
-#line 104 "assets/lexer.l"
+#line 110 "assets/lexer.l"
 {
         strbuf.append(yytext);
         update_loc(yytext);
@@ -933,15 +939,16 @@ YY_RULE_SETUP
 
 case 4:
 YY_RULE_SETUP
-#line 111 "assets/lexer.l"
+#line 117 "assets/lexer.l"
 {
+        pin_loc = loc;
         update_loc(yytext);
         bracket_incr(); 
     }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 115 "assets/lexer.l"
+#line 122 "assets/lexer.l"
 {
         Location l = loc;
 
@@ -950,7 +957,7 @@ YY_RULE_SETUP
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, l);
+            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, pin_loc, l);
             strbuf.clear();
             return tok;
         }
@@ -962,7 +969,7 @@ YY_RULE_SETUP
 case 6:
 /* rule 6 can match eol */
 YY_RULE_SETUP
-#line 131 "assets/lexer.l"
+#line 138 "assets/lexer.l"
 { 
         strbuf.append(yytext);
         update_loc(yytext);
@@ -972,7 +979,7 @@ YY_RULE_SETUP
 
 case 7:
 YY_RULE_SETUP
-#line 138 "assets/lexer.l"
+#line 145 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_incr();
@@ -983,7 +990,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 145 "assets/lexer.l"
+#line 152 "assets/lexer.l"
 {
         Location l = loc;
         update_loc(yytext);
@@ -991,7 +998,9 @@ YY_RULE_SETUP
 
         if (bc == 0) {
             yy_pop_state();
-            return MuskToken(mtt::SECTION_TOK_OBJ, strbuf, l);
+            auto tok = MuskToken(mtt::SECTION_TOK_OBJ, strbuf, pin_loc, l);
+            strbuf.clear();
+            return tok;
         }
         if (bc < 0){
             error("illegal close of missing tok declaration", yytext, yylineno);
@@ -1001,7 +1010,7 @@ YY_RULE_SETUP
 case 9:
 /* rule 9 can match eol */
 YY_RULE_SETUP
-#line 158 "assets/lexer.l"
+#line 167 "assets/lexer.l"
 { 
         strbuf.append(yytext);
         update_loc(yytext);
@@ -1011,7 +1020,7 @@ YY_RULE_SETUP
 
 case 10:
 YY_RULE_SETUP
-#line 165 "assets/lexer.l"
+#line 174 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_incr();
@@ -1022,7 +1031,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 172 "assets/lexer.l"
+#line 181 "assets/lexer.l"
 {
         Location l = loc;
         update_loc(yytext);
@@ -1030,7 +1039,9 @@ YY_RULE_SETUP
 
         if (bc == 0) {
             yy_pop_state();
-            return MuskToken(mtt::SECTION_TOK_TYPE, strbuf, l);
+            auto tok = MuskToken(mtt::SECTION_TOK_TYPE, strbuf, pin_loc, l);
+            strbuf.clear();
+            return tok;
         }
         if (bc < 0){
             error("illegal close of missing tok declaration", yytext, yylineno);
@@ -1040,7 +1051,7 @@ YY_RULE_SETUP
 case 12:
 /* rule 12 can match eol */
 YY_RULE_SETUP
-#line 185 "assets/lexer.l"
+#line 196 "assets/lexer.l"
 { 
         strbuf.append(yytext);
         update_loc(yytext);
@@ -1050,7 +1061,7 @@ YY_RULE_SETUP
 
 case 13:
 YY_RULE_SETUP
-#line 192 "assets/lexer.l"
+#line 203 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_incr();
@@ -1061,7 +1072,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 199 "assets/lexer.l"
+#line 210 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_decr();
@@ -1074,30 +1085,30 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 209 "assets/lexer.l"
-{ return MuskToken(mtt::TOK_DECL, post_update(yytext)); }
+#line 220 "assets/lexer.l"
+{ return MuskToken(mtt::TOK_DECL, post_update(yytext), loc); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 210 "assets/lexer.l"
-{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+#line 221 "assets/lexer.l"
+{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext), loc); }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 211 "assets/lexer.l"
-{ return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext)); }
+#line 222 "assets/lexer.l"
+{ return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext), loc); }
 	YY_BREAK
 case 18:
 /* rule 18 can match eol */
 YY_RULE_SETUP
-#line 212 "assets/lexer.l"
+#line 223 "assets/lexer.l"
 { update_loc(yytext); }
 	YY_BREAK
 
 
 case 19:
 YY_RULE_SETUP
-#line 216 "assets/lexer.l"
+#line 227 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_incr();
@@ -1108,15 +1119,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 223 "assets/lexer.l"
+#line 234 "assets/lexer.l"
 {
-        Location l = loc;
-        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0){
             yy_pop_state();
-            return MuskToken(mtt::SECTION_START, strbuf, l);    
+            return MuskToken(mtt::SECTION_START, strbuf, post_update(yytext), loc);
         }
         if (bc < 0){
             error("illegal close of missing block declaration", yytext, yylineno);
@@ -1126,7 +1135,7 @@ YY_RULE_SETUP
 case 21:
 /* rule 21 can match eol */
 YY_RULE_SETUP
-#line 236 "assets/lexer.l"
+#line 245 "assets/lexer.l"
 { 
         strbuf.append(yytext);
         update_loc(yytext);
@@ -1136,7 +1145,7 @@ YY_RULE_SETUP
 
 case 22:
 YY_RULE_SETUP
-#line 243 "assets/lexer.l"
+#line 252 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_incr();
@@ -1147,7 +1156,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 250 "assets/lexer.l"
+#line 259 "assets/lexer.l"
 {
         update_loc(yytext);
         int bc = bracket_decr();
@@ -1160,7 +1169,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 260 "assets/lexer.l"
+#line 269 "assets/lexer.l"
 {
         update_loc(yytext);
         bracket_nest();
@@ -1170,109 +1179,109 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 267 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_EOF, post_update(yytext)); }
+#line 276 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_EOF, post_update(yytext), loc); }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 268 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_SUM, post_update(yytext)); }
+#line 277 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_SUM, post_update(yytext), loc); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 269 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_SEP, post_update(yytext)); }
+#line 278 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_SEP, post_update(yytext), loc); }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 270 "assets/lexer.l"
-{ return MuskToken(mtt::PROD_END, post_update(yytext)); }
+#line 279 "assets/lexer.l"
+{ return MuskToken(mtt::PROD_END, post_update(yytext), loc); }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 271 "assets/lexer.l"
-{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+#line 280 "assets/lexer.l"
+{ return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext), loc); }
 	YY_BREAK
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 272 "assets/lexer.l"
+#line 281 "assets/lexer.l"
 { update_loc(yytext); }
 	YY_BREAK
 
 case 31:
 YY_RULE_SETUP
-#line 275 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext)); }
+#line 284 "assets/lexer.l"
+{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext), loc); }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 276 "assets/lexer.l"
-{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext)); }
+#line 285 "assets/lexer.l"
+{ yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext), loc); }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 277 "assets/lexer.l"
-{ yy_push_state(TOK_O_BLOCK_S); update_loc(yytext); }
+#line 286 "assets/lexer.l"
+{ yy_push_state(TOK_O_BLOCK_S); pin_loc = loc; update_loc(yytext); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 278 "assets/lexer.l"
-{ yy_push_state(TOK_T_BLOCK_S); update_loc(yytext); }
+#line 287 "assets/lexer.l"
+{ yy_push_state(TOK_T_BLOCK_S); pin_loc = loc; update_loc(yytext); }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 279 "assets/lexer.l"
-{ yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext)); }
+#line 288 "assets/lexer.l"
+{ yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext), loc); }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 280 "assets/lexer.l"
+#line 289 "assets/lexer.l"
 { yy_push_state(START_BLOCK_S); update_loc(yytext); }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 281 "assets/lexer.l"
-{ yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext)); }
+#line 290 "assets/lexer.l"
+{ yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext), loc); }
 	YY_BREAK
 case 38:
 /* rule 38 can match eol */
 YY_RULE_SETUP
-#line 282 "assets/lexer.l"
+#line 291 "assets/lexer.l"
 { update_loc(yytext); }
 	YY_BREAK
 case YY_STATE_EOF(MUSK_BLOCK_S):
-#line 284 "assets/lexer.l"
+#line 293 "assets/lexer.l"
 { error("illegal unclosed musk block", yytext, yylineno); }
 	YY_BREAK
 case YY_STATE_EOF(CODE_BLOCK_S):
-#line 285 "assets/lexer.l"
+#line 294 "assets/lexer.l"
 { error("illegal unclosed code block", yytext, yylineno); }
 	YY_BREAK
 case YY_STATE_EOF(DECL_BLOCK_S):
-#line 286 "assets/lexer.l"
+#line 295 "assets/lexer.l"
 { error("illegal unclosed declaration block", yytext, yylineno); }
 	YY_BREAK
 case YY_STATE_EOF(START_BLOCK_S):
-#line 287 "assets/lexer.l"
+#line 296 "assets/lexer.l"
 { error("illegal unclosed start block", yytext, yylineno); }
 	YY_BREAK
 case YY_STATE_EOF(PROD_BLOCK_S):
-#line 288 "assets/lexer.l"
+#line 297 "assets/lexer.l"
 { error("illegal unclosed production block", yytext, yylineno); }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(TOK_O_BLOCK_S):
 case YY_STATE_EOF(TOK_T_BLOCK_S):
-#line 289 "assets/lexer.l"
-{ return MuskToken(mtt::MUSK_EOF, loc); }
+#line 298 "assets/lexer.l"
+{ return MuskToken(mtt::MUSK_EOF, loc, loc); }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 290 "assets/lexer.l"
+#line 299 "assets/lexer.l"
 ECHO;
 	YY_BREAK
-#line 1275 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
+#line 1284 "/Users/huangyugen/Projects/Moschus/build-debug/../src/parser/frontend/musk_lexer.cpp"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2321,5 +2330,5 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 290 "assets/lexer.l"
+#line 299 "assets/lexer.l"
 

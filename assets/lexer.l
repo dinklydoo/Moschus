@@ -14,16 +14,18 @@
     #include <stack>
 
     static Location loc;
+    static Location pin_loc;
 
     // reset for testing
     void reset_loc(){
-        loc = {0,0};
+        loc = {1,1};
+        pin_loc = {1,1};
     }
 
     void update_loc(const std::string& yytext){
         for (int i = 0; i < yytext.length(); i++){
             if (yytext[i] == '\n'){
-                loc.col = 0;
+                loc.col = 1;
                 loc.line++;
             }
             else loc.col++;
@@ -85,6 +87,7 @@ MuskToken yylex();
 %%
 <MUSK_BLOCK_S>{
     "[" {
+        pin_loc = loc;
         update_loc(yytext);
         bracket_incr(); 
     }
@@ -96,9 +99,12 @@ MuskToken yylex();
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, l);
+            auto tok = MuskToken(mtt::MUSK_BLOCK, strbuf, pin_loc, l);
             strbuf.clear();
             return tok;
+        }
+        else if (bc < 0){
+            error("illegal close of missing block declaration", yytext, yylineno);
         }
     }
     (.|\n) {
@@ -109,6 +115,7 @@ MuskToken yylex();
 
 <CODE_BLOCK_S>{
     "{" {
+        pin_loc = loc;
         update_loc(yytext);
         bracket_incr(); 
     }
@@ -120,7 +127,7 @@ MuskToken yylex();
 
         if (bc == 0){
             yy_pop_state();
-            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, l);
+            auto tok = MuskToken(mtt::CODE_BLOCK, strbuf, pin_loc, l);
             strbuf.clear();
             return tok;
         }
@@ -149,7 +156,9 @@ MuskToken yylex();
 
         if (bc == 0) {
             yy_pop_state();
-            return MuskToken(mtt::SECTION_TOK_OBJ, strbuf, l);
+            auto tok = MuskToken(mtt::SECTION_TOK_OBJ, strbuf, pin_loc, l);
+            strbuf.clear();
+            return tok;
         }
         if (bc < 0){
             error("illegal close of missing tok declaration", yytext, yylineno);
@@ -176,7 +185,9 @@ MuskToken yylex();
 
         if (bc == 0) {
             yy_pop_state();
-            return MuskToken(mtt::SECTION_TOK_TYPE, strbuf, l);
+            auto tok = MuskToken(mtt::SECTION_TOK_TYPE, strbuf, pin_loc, l);
+            strbuf.clear();
+            return tok;
         }
         if (bc < 0){
             error("illegal close of missing tok declaration", yytext, yylineno);
@@ -206,9 +217,9 @@ MuskToken yylex();
         }
     }
 
-    "token"                         { return MuskToken(mtt::TOK_DECL, post_update(yytext)); }
-    [a-zA-Z0-9_][a-zA-Z0-9_]*       { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
-    [^[:space:],\[\]]+              { return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext)); }
+    "token"                         { return MuskToken(mtt::TOK_DECL, post_update(yytext), loc); }
+    [a-zA-Z0-9_][a-zA-Z0-9_]*       { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext), loc); }
+    [^[:space:],\[\]]+              { return MuskToken(mtt::TYPE_DECL, yytext, post_update(yytext), loc); }
     [ \t\n\r]+                      { update_loc(yytext); }
 }
 
@@ -221,13 +232,11 @@ MuskToken yylex();
         }
     }
     "]" {
-        Location l = loc;
-        update_loc(yytext);
         int bc = bracket_decr();
 
         if (bc == 0){
             yy_pop_state();
-            return MuskToken(mtt::SECTION_START, strbuf, l);    
+            return MuskToken(mtt::SECTION_START, strbuf, post_update(yytext), loc);
         }
         if (bc < 0){
             error("illegal close of missing block declaration", yytext, yylineno);
@@ -264,21 +273,21 @@ MuskToken yylex();
         yy_push_state(CODE_BLOCK_S);
     }
 
-    "$$"                        { return MuskToken(mtt::PROD_EOF, post_update(yytext)); }
-    "|"                         { return MuskToken(mtt::PROD_SUM, post_update(yytext)); }
-    ":"                         { return MuskToken(mtt::PROD_SEP, post_update(yytext)); }
-    ";"                         { return MuskToken(mtt::PROD_END, post_update(yytext)); }
-    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext)); }
+    "$$"                        { return MuskToken(mtt::PROD_EOF, post_update(yytext), loc); }
+    "|"                         { return MuskToken(mtt::PROD_SUM, post_update(yytext), loc); }
+    ":"                         { return MuskToken(mtt::PROD_SEP, post_update(yytext), loc); }
+    ";"                         { return MuskToken(mtt::PROD_END, post_update(yytext), loc); }
+    [a-zA-Z0-9_][a-zA-Z0-9_]*   { return MuskToken(mtt::TERM_DECL, yytext, post_update(yytext), loc); }
     [ \t\n\r]+                  { update_loc(yytext); }
 }
 
-"@includes"         { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext)); }
-"@utilities"        { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext)); }
-"@token_obj"        { yy_push_state(TOK_O_BLOCK_S); update_loc(yytext); }
-"@token_type"       { yy_push_state(TOK_T_BLOCK_S); update_loc(yytext); }
-"@declarations"     { yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext)); }
+"@includes"         { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_INCLUDES, post_update(yytext), loc); }
+"@utilities"        { yy_push_state(MUSK_BLOCK_S); return MuskToken(mtt::SECTION_UTILS, post_update(yytext), loc); }
+"@token_obj"        { yy_push_state(TOK_O_BLOCK_S); pin_loc = loc; update_loc(yytext); }
+"@token_type"       { yy_push_state(TOK_T_BLOCK_S); pin_loc = loc; update_loc(yytext); }
+"@declarations"     { yy_push_state(DECL_BLOCK_S); return MuskToken(mtt::SECTION_DECL, post_update(yytext), loc); }
 "@start"            { yy_push_state(START_BLOCK_S); update_loc(yytext); }
-"@productions"      { yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext)); }
+"@productions"      { yy_push_state(PROD_BLOCK_S); return MuskToken(mtt::SECTION_PROD, post_update(yytext), loc); }
 [ \t\n\r]+          { update_loc(yytext); }
 
 <MUSK_BLOCK_S><<EOF>>   { error("illegal unclosed musk block", yytext, yylineno); }
@@ -286,5 +295,5 @@ MuskToken yylex();
 <DECL_BLOCK_S><<EOF>>   { error("illegal unclosed declaration block", yytext, yylineno); }
 <START_BLOCK_S><<EOF>>  { error("illegal unclosed start block", yytext, yylineno); }
 <PROD_BLOCK_S><<EOF>>   { error("illegal unclosed production block", yytext, yylineno); }
-<<EOF>>                 { return MuskToken(mtt::MUSK_EOF, loc); }
+<<EOF>>                 { return MuskToken(mtt::MUSK_EOF, loc, loc); }
 %%

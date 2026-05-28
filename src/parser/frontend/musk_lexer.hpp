@@ -481,7 +481,7 @@ extern int yylex (void);
 #undef yyTABLES_NAME
 #endif
 
-#line 290 "assets/lexer.l"
+#line 299 "assets/lexer.l"
 
 
 #line 487 "src/parser/frontend/musk_lexer.hpp"

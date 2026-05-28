@@ -11,8 +11,8 @@ using MuskTokenStream = std::vector<MuskToken>;
 using MuskTTypeStream = std::vector<MuskTokenType>;
 
 struct Location {
-    int line;
-    int col;
+    int line = 1;
+    int col = 1;
 };
 
 enum class MuskTokenType {
@@ -45,9 +45,10 @@ struct MuskToken {
     MuskTokenType type;
     std::string internal;
 
-    Location loc;
+    Location start_loc;
+    Location end_loc;
 
     MuskToken() = default;
-    MuskToken(mtt type, Location loc) : type(type), loc(loc) {}
-    MuskToken(mtt type, std::string strbuf, Location loc) : type(type), internal(strbuf), loc(loc) {}
+    MuskToken(mtt type, Location sloc, Location eloc) : type(type), start_loc(sloc), end_loc(eloc) {}
+    MuskToken(mtt type, std::string strbuf, Location sloc, Location eloc) : type(type), internal(strbuf), start_loc(sloc), end_loc(eloc) {}
 };

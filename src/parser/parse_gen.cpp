@@ -1,3 +1,6 @@
-#include "frontend/musk_lexer.cpp"
+#include "parse_gen.hpp"
 
-MuskToken token = yylex();
+void generate_parser(const std::string& filepath) {
+
+
+}
