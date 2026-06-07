@@ -3,7 +3,11 @@
 #include <stdexcept>
 
 enum class MoschusErrorType {
-  MuskParserError
+MuskParserError,
+MuskStartError,
+FileIOError,
+NullDeref,
+BadAccess,
 };
 
 class MoschusError : public std::runtime_error {

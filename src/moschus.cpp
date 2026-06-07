@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
       }
 
       try {
-        generate_parser(output_file);
+        generate_parser(musk_file ,output_file);
       } catch (const MoschusError &e) {
         // TODO log error or smthing -> based on type
         return -1;

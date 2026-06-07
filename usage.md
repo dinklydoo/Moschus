@@ -3,15 +3,35 @@ Moschus follows yacc production syntax however the parser file defined as the `.
 
 Unlike YACC and ANTLR however Moschus supports LR(1) grammars as opposed to LALR(1) in Yacc and LR(k-ish?) in ANTLR.
 
+To actually run the parser given we already have a suitable `.musk` file:
+~~~
+# Ensure suitable Conan version and CMake version in addition to a cpp20+ compiler
+# yada yada yada Conan build and CMake build
+
+# To run the parser once compiled provide the flags
+> moschus -g [filename].musk
+OR
+> moschus --generate [filename].musk
+# this will output two files in the same directory as [filename]
+# - [filename].cpp
+# - [filename].hpp
+# corresponding to the parser body in the .cpp file
+# and the parser header in the .cpp file
+
+# if you wish to specify your own output path, just add the output flags:
+> moschus -g [filename].musk -o [output_file]
+OR
+> moschus -g [filename].musk --output [output_file]
+~~~
 To define a Moschus Parser File you can either create one from scratch with any name suffixed with `.musk`:
 ~~~
 [filename].musk
 ~~~
 Or create a templated `.musk` file with the command:
 ~~~
-> muschous -t [filename]
+> moschus -t [filename]
 OR
-> muschous --template [filename]
+> moschus --template [filename]
 ~~~
 This will give the following template file `[filename].musk`:
 ~~~

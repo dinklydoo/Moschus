@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <unordered_map>
+
 #include "musk_tokens.hpp"
 
 struct MuskAST;
@@ -53,8 +55,7 @@ struct MuskAST {
     std::vector<TokenDeclaration> tok_decls;
     std::vector<NonTerminalDeclaration> nt_decls;
 
-    std::vector<ProductionRule> prod_rules;
-
+    std::unordered_map<std::string, std::vector<ProductionRule>> prod_rules;
 };
 
 using tok_it = std::vector<MuskToken>::const_iterator;
@@ -68,4 +69,4 @@ std::string parse_utilities(p_args);
 TokenProperties parse_token_p(p_args);
 decl_pair parse_decl(p_args);
 std::string parse_start(p_args);
-std::vector<ProductionRule> parse_prod(p_args);
+std::unordered_map<std::string, std::vector<ProductionRule>> parse_prod(p_args);

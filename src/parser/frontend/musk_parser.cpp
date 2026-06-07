@@ -306,7 +306,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
             }
         }
 
-        if (!in_sequence && it->type == mtt::PROD_SEP){
+        if (!in_sequence && it->type == mtt::PROD_SUM){
             tok_it_incr(it, end, p_rules);
 
             p_rules.push_back(p_rule);
@@ -316,11 +316,17 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
             in_sequence = true;
         }
     }
+    p_rules.push_back(p_rule);
+    if (it->type != mtt::PROD_END){
+        push_error(it, end, "Missing production end symbol");
+    }
+    tok_it_incr(it, end, p_rules);
+
     return p_rules;
 }
 
-std::vector<ProductionRule> parse_prod(tok_it& it, tok_it end){
-    std::vector<ProductionRule> p_rules;
+std::unordered_map<std::string, std::vector<ProductionRule>> parse_prod(tok_it& it, tok_it end){
+    std::unordered_map<std::string, std::vector<ProductionRule>> p_rules;
     if (it == end){
         eof_error(errors);
         return p_rules;
@@ -332,9 +338,14 @@ std::vector<ProductionRule> parse_prod(tok_it& it, tok_it end){
     tok_it_incr(it, end, p_rules);
     
     std::vector<ProductionRule> p_subrules;
-    while (it->type != mtt::MUSK_EOF){
-        p_rules.insert(p_rules.end(), p_subrules.begin(), p_subrules.end());
-        tok_it_incr(it, end, p_rules);
+    while (it->type != MuskTokenType::MUSK_EOF){
+        p_subrules = parse_rule(it, end);
+        const std::string base = p_subrules[0].nt_base;
+        if (!p_rules.contains(base)) p_rules.emplace(base, p_subrules);
+        else {
+            std::vector<ProductionRule>& p_temp = p_rules.at(base);
+            p_temp.insert(p_temp.end(), p_subrules.begin(), p_subrules.end());
+        }
     }
     return p_rules;
 }
