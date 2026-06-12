@@ -16,15 +16,14 @@ using ProductionItem = unsigned long long;
 struct ProductionAlias {
   private:
     // global count of number of productionItems
-    static unsigned long long registered_alias;
-    std::unordered_map<std::string, ProductionItem> terminal_alias;
-    std::unordered_map<std::string, ProductionItem> nonterm_alias;
+    // reserve 0 for EOF token ($$) or in parser ast representation "__[EOF]__"
+    static inline unsigned long long _registered_alias = 1;
+    std::unordered_map<std::string, ProductionItem> _terminal_alias;
+    std::unordered_map<std::string, ProductionItem> _nonterm_alias;
 
   public:
     ProductionAlias(){
-      // reserve 0 for EOF token ($$) or in parser ast representation "__[EOF]__"
-      registered_alias=1;
-      terminal_alias.emplace("__[EOF]__", 0);
+      _terminal_alias.emplace("__[EOF]__", 0);
     }
     void new_alias(const std::string& label, bool terminal);
 
@@ -45,14 +44,18 @@ struct ProductionStore {
 struct ProductionObject {
   private:
     ProductionItem production_root; // non-terminal lhs of production
-    bool processed; // has been processed recursively
+    bool NULLABLE;
     std::set<ProductionItem> FIRST; // first set
     std::set<ProductionItem> FOLLOW; // follow set
   public:
-    ProductionObject(ProductionItem root) : production_root(root), processed(false) {}
-    ProductionItem get_root() const;
+    ProductionObject(ProductionItem root) : production_root(root), NULLABLE(false) {}
+    ProductionItem get_root() const {return production_root;}
+    void set_NULLABLE() {NULLABLE = true;}
+    bool is_NULLABLE() const {return NULLABLE;}
     void FIRST_union(const ProductionObject& other); // join FIRST sets
     void FIRST_insert(ProductionItem item);
+    void FOLLOW_union_first(const ProductionObject& other); // join FIRST of other into FOLLOW
+    void FOLLOW_union_follow(const ProductionObject& other); // join FOLLOW of other into FOLLOW
     void FOLLOW_insert(ProductionItem item); // add a new FOLLOW token
 
     const std::set<ProductionItem>& get_FIRST() const;
@@ -60,8 +63,8 @@ struct ProductionObject {
 };
 
 namespace ProductionProcesser {
-  static ProductionStore _store;
-  static ProductionAlias _alias;
+  static ProductionStore store_;
+  static ProductionAlias alias_;
 
   void process_musk_ast(const musk_ptr& ast);
 

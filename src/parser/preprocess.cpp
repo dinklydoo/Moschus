@@ -1,19 +1,21 @@
 #include "preprocess.hpp"
 #include "../errors/moschus_error.hpp"
 
+// Method definitions for preprocesser objects
+
 void ProductionAlias::new_alias(const std::string& label, bool terminal){
   std::unordered_map<std::string, ProductionItem>& _map =
-    (terminal)? terminal_alias : nonterm_alias;
+    (terminal)? _terminal_alias : _nonterm_alias;
 
   if (_map.count(label)) return;
 
-  _map.emplace(label, registered_alias);
-  registered_alias++;
+  _map.emplace(label, _registered_alias);
+  _registered_alias++;
 }
 
 ProductionItem ProductionAlias::try_alias(const std::string& label, bool terminal, bool& ok) const noexcept {
   const std::unordered_map<std::string, ProductionItem>& _map =
-    (terminal)? terminal_alias : nonterm_alias;
+    (terminal)? _terminal_alias : _nonterm_alias;
 
   if (_map.count(label)){
     ok = true;
@@ -25,7 +27,7 @@ ProductionItem ProductionAlias::try_alias(const std::string& label, bool termina
 
 ProductionItem ProductionAlias::get_alias(const std::string& label, bool terminal) const {
   const std::unordered_map<std::string, ProductionItem>& _map =
-    (terminal)? terminal_alias : nonterm_alias;
+    (terminal)? _terminal_alias : _nonterm_alias;
   try {
     return _map.at(label);
   } catch (std::out_of_range){
@@ -60,11 +62,6 @@ ProductionObject& ProductionStore::get_object(ProductionItem item) const {
   }
 }
 
-
-ProductionItem ProductionObject::get_root() const {
-  return production_root;
-}
-
 void ProductionObject::FIRST_insert(ProductionItem item){
   FIRST.insert(item);
 }
@@ -79,6 +76,19 @@ void ProductionObject::FIRST_union(const ProductionObject& other){
 
 void ProductionObject::FOLLOW_insert(ProductionItem item){
   FOLLOW.insert(item);
+}
+
+void ProductionObject::FOLLOW_union_first(const ProductionObject& other){
+  // this time the same instance CAN modify the FOLLOW set in left-recursive productions
+  const std::set<ProductionItem>& _oFIRST = other.get_FIRST();
+  FOLLOW.insert(_oFIRST.begin(), _oFIRST.end());
+}
+
+void ProductionObject::FOLLOW_union_follow(const ProductionObject& other){
+  if (&other == this) return;
+
+  const std::set<ProductionItem>& _oFOLLOW = other.get_FOLLOW();
+  FOLLOW.insert(_oFOLLOW.begin(), _oFOLLOW.end());
 }
 
 const std::set<ProductionItem>& ProductionObject::get_FIRST() const {

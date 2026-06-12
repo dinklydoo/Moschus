@@ -202,11 +202,11 @@ decl_pair parse_decl(tok_it& it, tok_it end){
 
         switch (it->type) {
             case mtt::TOK_DECL: 
-                parse_tok_decl(it, end);
+                tok_decl.push_back(parse_tok_decl(it, end));
                 break;
             case mtt::TERM_DECL: // term is a stricter binding of type, a type can be parsed as a term
             case mtt::TYPE_DECL:
-                parse_nt_decl(it, end);
+                nt_decl.push_back(parse_nt_decl(it, end));
                 break;
             case mtt::SECTION_START:
                 in_declarations = false;

@@ -1,18 +1,10 @@
 #include <gtest/gtest.h>
-#include "../src/parser/frontend/musk_lexer.hpp"
+#include "test_builder.hpp"
+
 #include "../src/parser/frontend/musk_tokens.hpp"
 
 TEST(LEXER, MUSK_FILE){
-    yyin = fopen("tests/assets/example.musk", "r");
-    ASSERT_NE(yyin, nullptr);
-
-    MuskTokenStream tok_stream;
-    
-    MuskToken token;
-
-    while ((token = yylex()).type != mtt::MUSK_EOF){
-        tok_stream.push_back(token);
-    }
+    MuskTokenStream tok_stream = TestBuilder::build_tok_s("example.musk");
 
     MuskTTypeStream expected = {
         mtt::SECTION_INCLUDES,
@@ -89,7 +81,8 @@ TEST(LEXER, MUSK_FILE){
         mtt::PROD_SUM,
         mtt::TERM_DECL,
         mtt::CODE_BLOCK,
-        mtt::PROD_END
+        mtt::PROD_END,
+        mtt::MUSK_EOF
     };
 
     auto equals = [](const MuskTokenStream& out, const MuskTTypeStream& exp)->bool{
