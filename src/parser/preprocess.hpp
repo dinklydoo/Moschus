@@ -63,9 +63,8 @@ struct ProductionObject {
 };
 
 namespace ProductionProcesser {
-  static ProductionStore store_;
-  static ProductionAlias alias_;
+  extern ProductionStore store_;
+  extern ProductionAlias alias_;
 
   void process_musk_ast(const musk_ptr& ast);
-
 }

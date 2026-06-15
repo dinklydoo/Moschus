@@ -1,6 +1,11 @@
 #include "preprocess.hpp"
 #include "../errors/moschus_error.hpp"
 
+namespace ProductionProcesser {
+  ProductionStore store_;
+  ProductionAlias alias_;
+}
+
 // Method definitions for preprocesser objects
 
 void ProductionAlias::new_alias(const std::string& label, bool terminal){
@@ -31,7 +36,7 @@ ProductionItem ProductionAlias::get_alias(const std::string& label, bool termina
   try {
     return _map.at(label);
   } catch (std::out_of_range){
-    std::string err_string = std::string("No alias found for ")+((terminal)?"non-terminal":"terminal")+" named: "+label;
+    std::string err_string = std::string("No alias found for ")+((terminal)?"terminal":"non-terminal")+" named: "+label;
     throw MoschusError(err_string, MoschusErrorType::BadAccess);
   }
 }

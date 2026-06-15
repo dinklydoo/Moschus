@@ -19,6 +19,10 @@ namespace ProductionProcesser {
     void populate_nonterminals(const musk_ptr& ast){
       for (auto& non_term : ast->nt_decls){
         alias_.new_alias(non_term.nt_identifier, false);
+
+        // create the alias item
+        ProductionItem item = alias_.get_alias(non_term.nt_identifier, false);
+        store_.new_object(item);
       }
     }
 
@@ -271,6 +275,8 @@ namespace ProductionProcesser {
                 if (next_obj == nullptr){
                   ProductionItem terminal = alias_.get_alias(rule.nt_prods[next_i], true);
                   candidate.FOLLOW_insert(terminal);
+
+                  break; // terminal ends the sequence
                 } else {
                   candidate.FOLLOW_union_first(*next_obj);
 
