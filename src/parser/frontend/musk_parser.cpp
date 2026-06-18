@@ -310,8 +310,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
             tok_it_incr(it, end, p_rules);
 
             p_rules.push_back(p_rule);
-            p_rule.nt_prods.clear();
-            p_rule.prod_action.clear();
+            p_rule = ProductionRule(nt_base);
 
             in_sequence = true;
         }

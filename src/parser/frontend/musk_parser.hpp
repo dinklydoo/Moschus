@@ -11,42 +11,49 @@ using musk_ptr = std::unique_ptr<MuskAST>;
 
 /* global definition of tokens, specifies toktype and objtype */
 struct TokenProperties {
-    std::string token_type;
-    std::string token_object;  
+  std::string token_type;
+  std::string token_object;
 };
 
 /* container for header code, include paths + user defined code utilities */
 struct MuskHeader {
-    std::string head_includes;
-    std::string head_utils;
+  std::string head_includes;
+  std::string head_utils;
 
-    bool header_valid() const{
-        return !head_includes.empty() || !head_utils.empty();
-    }
+  bool header_valid() const{
+    return !head_includes.empty() || !head_utils.empty();
+  }
 };
 
 /* token declarations, just a token identifier (type is inferred from TokenProperties)*/
 struct TokenDeclaration {
-    std::string token_identifier;
+  std::string token_identifier;
 };
 
 /* non-term declarations, pair of non-terminal type and identifier */
 struct NonTerminalDeclaration {
-    std::string nt_type;
-    std::string nt_identifier;
+  std::string nt_type;
+  std::string nt_identifier;
 };
+
+using RuleIdentifier = long long;
 
 /* a single production rule of form A -> a..A, specifies lhs and rhs + action when match*/
 struct ProductionRule {
+  private:
+    inline static RuleIdentifier _defined_rules = 0;
+  public:
     std::string nt_base;
     std::string prod_action;
 
     std::vector<std::string> nt_prods;
+    RuleIdentifier rule_identifier;
+
+    ProductionRule(const std::string& _base) : nt_base(_base), rule_identifier(_defined_rules++) {};
 };
 
 /* tree representation of our .musk file */
 struct MuskAST {
-
     TokenProperties tok_prop;
     MuskHeader musk_header;
 
@@ -56,6 +63,7 @@ struct MuskAST {
     std::vector<NonTerminalDeclaration> nt_decls;
 
     std::unordered_map<std::string, std::vector<ProductionRule>> prod_rules;
+    std::unordered_map<RuleIdentifier, ProductionRule> rules_by_id;
 };
 
 using tok_it = std::vector<MuskToken>::const_iterator;

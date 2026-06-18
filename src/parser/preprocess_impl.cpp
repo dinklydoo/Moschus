@@ -10,12 +10,30 @@ namespace ProductionProcesser {
 
   namespace {
 
+    /**
+     * Register all production rules by their unique identifiers
+     **/
+    void register_production_rules(const musk_ptr& ast){
+      for (auto& rules_by_nt : ast->prod_rules){
+        for (auto& p_rule : rules_by_nt.second){
+          ast->rules_by_id.emplace(p_rule.rule_identifier, p_rule);
+        }
+      }
+    }
+
+    /**
+    * Take all terminal definitions and register them into alias_
+    **/
     void populate_terminals(const musk_ptr& ast){
       for (auto& term : ast->tok_decls){
         alias_.new_alias(term.token_identifier, true);
       }
     }
 
+    /**
+    * Take all terminal definitions and register them into alias_
+    * ALSO generate the Non-terminal Objects for their alias in store_
+    **/
     void populate_nonterminals(const musk_ptr& ast){
       for (auto& non_term : ast->nt_decls){
         alias_.new_alias(non_term.nt_identifier, false);
@@ -127,10 +145,38 @@ namespace ProductionProcesser {
       // TODO : throw here before the preprocesser runs
     }
 
+    /**
+     * Populate the rule store with aliased productions
+     **/
+    void populate_rule_store(const musk_ptr& ast){
+      for (auto& prods : ast->prod_rules){
+        ProductionItem nt_alias = alias_.get_alias(prods.first, false);
+        rules_.add_productions(nt_alias, prods.second);
+
+        for (auto& rule : prods.second){
+          RuleIdentifier rule_id = rule.rule_identifier;
+          std::vector<SymbolAlias> consequent;
+          for (const std::string& symbol : rule.nt_prods){
+            bool is_nt;
+            ProductionItem symbol_alias = alias_.try_alias(symbol, false, is_nt);
+            if (!is_nt) symbol_alias = alias_.get_alias(symbol, true);
+
+            consequent.emplace_back(symbol_alias, !is_nt);
+          }
+          rules_.add_rule(rule_id, consequent);
+        }
+      }
+    }
+
     ProductionObject& get_nonterminal_object(const std::string& label){
       ProductionItem _item = alias_.get_alias(label, false);
       return store_.get_object(_item);
     }
+
+
+    // TODO : rewrite the FIRST and FOLLOW construction to use rules_ (cached aliasing),
+    // i really cbf to do this rn after going back and forth with the OOP design and is
+    // still honestly subject to change so leave until the design is fixed
 
     /**
      * Construct the FIRST sets for all non-terminals
@@ -166,6 +212,7 @@ namespace ProductionProcesser {
             ProductionItem first_alias = alias_.try_alias(rule.nt_prods[0], false, is_nt);
             if (is_nt) { // non-terminal first
               const ProductionObject& first_obj = store_.get_object(first_alias);
+              nt_obj.FIRST_union(first_obj);
 
               // first non-term is nullable look-ahead
               if (first_obj.is_NULLABLE()){
@@ -176,12 +223,10 @@ namespace ProductionProcesser {
                   // non-terminal follows a NULLABLE non-terminal
                   if (is_nt){
                     ProductionObject& next_obj = store_.get_object(next_alias);
+                    nt_obj.FIRST_union(next_obj);
 
-                    // the next non-terminal is non-NULLABLE, union the FIRST sets and end lookahead
-                    if (!next_obj.is_NULLABLE()){
-                      nt_obj.FIRST_union(next_obj);
-                      break;
-                    }
+                    // the next non-terminal is non-NULLABLE, end lookahead
+                    if (!next_obj.is_NULLABLE()) break;
                   }
                   // terminal follows a NULLABLE non-terminal, is the FIRST token of this prod rule
                   else {
@@ -194,10 +239,6 @@ namespace ProductionProcesser {
                 if (next_i == rule.nt_prods.size()){
                   nt_obj.set_NULLABLE();
                 }
-              }
-              // first non-term is fixed join fixed set
-              else {
-                nt_obj.FIRST_union(first_obj);
               }
             }
             // terminal first directly in the FIRST set
@@ -291,15 +332,22 @@ namespace ProductionProcesser {
         }
       }
     }
-
   }
 
   void process_musk_ast(const musk_ptr& ast){
+    register_production_rules(ast);
+
+    // alias terminals and non-terminals
     populate_terminals(ast);
     populate_nonterminals(ast);
 
+    // sanitize the ast productions for pre-process errors/warnings
     validate_productions(ast);
+    // TODO : throw fatal errors here or inside of validate
 
+    populate_rule_store(ast);
+
+    // take aliased productions and generate FIRST/FOLLOW/NULLABLE sets
     construct_FIRST(ast);
     construct_FOLLOW(ast);
   }

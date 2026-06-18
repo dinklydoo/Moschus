@@ -27,8 +27,9 @@ add_library(moschus_lib
     src/musk_template.cpp
     src/parser/frontend/musk_error.cpp
     src/parser/frontend/musk_parser.cpp
-    src/parser/preprocess.cpp
-    src/parser/processer.cpp
+    src/parser/preprocess_member.cpp
+    src/parser/preprocess_impl.cpp
+    src/parser/table_gen.cpp
     ${FLEX_Lexer_OUTPUTS}
 )
 
@@ -40,6 +41,7 @@ add_executable(tests
     tests/musklex_test.cpp
     tests/muskparse_test.cpp
     tests/first_follow_test.cpp
+    tests/table_test.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} 

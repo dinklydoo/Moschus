@@ -4,6 +4,7 @@
 namespace ProductionProcesser {
   ProductionStore store_;
   ProductionAlias alias_;
+  ProductionRuleStore rules_;
 }
 
 // Method definitions for preprocesser objects
@@ -41,6 +42,22 @@ ProductionItem ProductionAlias::get_alias(const std::string& label, bool termina
   }
 }
 
+std::set<ProductionItem> ProductionAlias::get_terminals() const {
+  std::set<ProductionItem> terminals;
+  for (const auto& t_alias : _terminal_alias){
+    terminals.insert(t_alias.second);
+  }
+  return terminals;
+}
+
+std::set<ProductionItem> ProductionAlias::get_nonterminals() const {
+  std::set<ProductionItem> nonterminals;
+  for (const auto& nt_alias : _nonterm_alias){
+    nonterminals.insert(nt_alias.second);
+  }
+  return nonterminals;
+}
+
 void ProductionStore::new_object(ProductionItem item) {
   if (_store.contains(item)) return;
 
@@ -67,11 +84,32 @@ ProductionObject& ProductionStore::get_object(ProductionItem item) const {
   }
 }
 
+void ProductionRuleStore::add_rule(RuleIdentifier rule_id, const std::vector<SymbolAlias>& consequent){
+  _rules.emplace(rule_id, consequent);
+}
+
+void ProductionRuleStore::add_productions(ProductionItem nt_alias, const std::vector<ProductionRule>& nt_prods){
+  for (const auto& rule : nt_prods){
+    _produces[nt_alias].push_back(rule.rule_identifier);
+  }
+}
+
+const std::vector<SymbolAlias>& ProductionRuleStore::get_prod_symbols(RuleIdentifier rule_id) const {
+  return _rules.at(rule_id);
+}
+
+SymbolAlias ProductionRuleStore::get_symbol_at(RuleIdentifier rule_id, unsigned long long pos) const{
+  return _rules.at(rule_id)[pos];
+}
+
+const std::vector<RuleIdentifier>& ProductionRuleStore::get_productions(ProductionItem item) const {
+  return _produces.at(item);
+}
+
 void ProductionObject::FIRST_insert(ProductionItem item){
   FIRST.insert(item);
 }
 
-// TODO : remember to take lfp of Union, topological is not enough for circular dependency (A -> B | some tokens) (B -> A | some tokens)
 void ProductionObject::FIRST_union(const ProductionObject& other){
   if (&other == this) return; // same instance / direct left recursion
 

@@ -5,38 +5,26 @@
 #include "../src/parser/frontend/musk_parser.hpp"
 
 TEST(PARSER, MUSK_FILE){
-    MuskTokenStream tok_stream = TestBuilder::build_tok_s("example.musk");
-
-    musk_ptr ast = parse_musk(tok_stream);
-
+    musk_ptr ast = TestBuilder::build_ast("example.musk");
     EXPECT_NE(ast, nullptr);
 }
 
 TEST(PARSER, INCLUDE_OK){
-    MuskTokenStream tok_stream = TestBuilder::build_tok_s("include_ok.musk");
-
-    musk_ptr ast = parse_musk(tok_stream);
-
+    musk_ptr ast = TestBuilder::build_ast("include_ok.musk");
     EXPECT_NE(ast, nullptr);
 }
 
 TEST(PARSER, UTILS_OK){
-    MuskTokenStream tok_stream = TestBuilder::build_tok_s("utils_ok.musk");
-
-    musk_ptr ast = parse_musk(tok_stream);
-
+    musk_ptr ast = TestBuilder::build_ast("utils_ok.musk");
     EXPECT_NE(ast, nullptr);
 }
 
-
 TEST(PARSER, MISSING_TOKEN){
     MuskTokenStream tok_stream = TestBuilder::build_tok_s("missing_token.musk");
-
     EXPECT_THROW(parse_musk(tok_stream), MoschusError);
 }
 
 TEST(PARSER, MISSING_HEADER){
     MuskTokenStream tok_stream = TestBuilder::build_tok_s("missing_header.musk");
-
     EXPECT_THROW(parse_musk(tok_stream), MoschusError);
 }
