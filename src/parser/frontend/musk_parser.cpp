@@ -1,6 +1,8 @@
 #include "musk_parser.hpp"
-#include "musk_error.hpp"
 #include "musk_tokens.hpp"
+
+#include "../../errors/except_handler.hpp"
+#include "../../errors/format_errors.hpp"
 
 #include <unordered_set>
 
@@ -16,12 +18,15 @@
     as an individual production
 
 */
-static musk_errors errors;
-static musk_warnings warnings;
 
 #define tok_eof(it, end, ret)\
     if (it == end){\
-        eof_error(errors);\
+        MoschusExceptHandler::push_error(\
+            MoschusError(\
+                MoschusString(Color::red, "Unexpected end of musk file, musk file is missing key blocks"),\
+                MoschusErrorType::MoschusGeneric\
+            )\
+        );\
         return ret;\
     }\
 
@@ -46,31 +51,35 @@ void stabilise(tok_it& it, tok_it end){
     }
 }
 
-// define our error macro to automatically stabilise after detecting an error
-#define push_error(it, end, msg)\
-    errors.push_back(\
-        MuskError(msg, it->start_loc, it->end_loc)\
-    );\
-    stabilise(it, end)
+void push_error(auto it, auto end, const std::string& msg){
+    MoschusExceptHandler::push_error(
+        MoschusError(
+            MoschusString(Color::red, format_message_loc(msg, it->start_loc).data()),
+            MoschusErrorType::MoschusGeneric
+        )
+    );
+    stabilise(it, end);
+}
 
-#define push_warning(it, end, msg)\
-    warnings.push_back(\
-        MuskWarning(msg, it->start_loc, it->end_loc)\
-    )
-
+void push_warning(auto it, auto end, const std::string& msg){
+    MoschusExceptHandler::push_warning(
+        MoschusString(Color::magenta, format_message_loc(msg, it->start_loc).data())
+    );
+}
 /*
     Main API to the musk parser,
     recursive descent with some "decent" error handling
     and recovery
 */
-musk_ptr parse_musk(const MuskTokenStream& toks){
-    errors.clear();
-    warnings.clear();
+musk_ptr parse_musk(const std::string& fpath, const MuskTokenStream& toks){
+    // TODO : ideally we actually register during lexing but I dont want to deal with flex cpp right now so 
+    // just leave it in parsing, lexing stage is just gonna have to deal with shit lex error messages
+    register_file_path(fpath); 
 
     // with const vector we can safely pass the iterator as we consume tokens
     tok_it it = toks.begin();
 
-    musk_ptr musk_ast = std::make_unique<MuskAST>();
+    musk_ptr musk_ast = std::make_unique<MuskAST>(fpath);
 
     musk_ast->musk_header.head_includes = parse_includes(it, toks.end());
     musk_ast->musk_header.head_utils = parse_utilities(it, toks.end());
@@ -92,8 +101,8 @@ musk_ptr parse_musk(const MuskTokenStream& toks){
     musk_ast->start_nt = parse_start(it, toks.end());
     musk_ast->prod_rules = parse_prod(it, toks.end());
 
-    log_warnings(warnings);
-    log_errors(errors);
+    MoschusExceptHandler::log_warnings();
+    MoschusExceptHandler::log_errors();
 
     return musk_ast;
 }
@@ -237,23 +246,27 @@ decl_pair parse_decl(tok_it& it, tok_it end){
     return {tok_decl, nt_decl};
 }
 
-std::string parse_start(tok_it& it, tok_it end){
-    tok_eof(it, end, "");
+ProductionTerm parse_start(tok_it& it, tok_it end){
+    ProductionTerm term{};
+
+    tok_eof(it, end, term);
     
     if (it->type != mtt::SECTION_START){
         //throw
         push_error(it, end, "Missing or misaligned start symbol block @start");
-        return "";
+        return term;
     }
 
     if (it->internal.empty()){
         push_error(it, end, "Start symbol is empty/undefined in @start");
-        return "";
+        return term;
     }
 
-    const std::string& nt = it->internal;
-    tok_it_incr(it, end, "");
-    return nt;
+    term.label = it->internal;
+    term.start_location = it->start_loc;
+    term.end_location = it->end_loc;
+    tok_it_incr(it, end, term);
+    return term;
 }
 
 std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
@@ -265,7 +278,11 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
         push_error(it, end, "Grammar production must have a single non-terminal on left-hand size");
         return p_rules;
     }
+
     const std::string& nt_base = it->internal;
+    const Location& start_loc = it->start_loc;
+    const Location& end_loc = it->end_loc;
+    
     tok_it_incr(it, end, p_rules);
     if (it->type != mtt::PROD_SEP){
         push_error(it, end, "Grammar production missing token seperator");
@@ -273,8 +290,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
     }
     tok_it_incr(it, end, p_rules);
     
-
-    ProductionRule p_rule(nt_base);
+    ProductionRule p_rule(nt_base, start_loc, end_loc);
 
     bool in_sequence = true;
     bool eof_consumed = false;
@@ -284,12 +300,12 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
                 if (eof_consumed){
                     push_warning(it, end, "Productions past an EOF token $$, production is never satisfied");
                 }
-                p_rule.nt_prods.push_back(it->internal);
+                p_rule.nt_prods.emplace_back(it->internal, it->start_loc, it->end_loc);
                 tok_it_incr(it, end, p_rules);
                 break;
             }
             case mtt::PROD_EOF : {
-                p_rule.nt_prods.push_back("__[EOF]__");
+                p_rule.nt_prods.emplace_back("__[EOF]__", it->start_loc, it->end_loc);
                 tok_it_incr(it, end, p_rules);
                 eof_consumed = true;
                 break;
@@ -310,7 +326,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
             tok_it_incr(it, end, p_rules);
 
             p_rules.push_back(p_rule);
-            p_rule = ProductionRule(nt_base);
+            p_rule = ProductionRule(nt_base, start_loc, end_loc);
 
             in_sequence = true;
         }
@@ -326,10 +342,8 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
 
 std::unordered_map<std::string, std::vector<ProductionRule>> parse_prod(tok_it& it, tok_it end){
     std::unordered_map<std::string, std::vector<ProductionRule>> p_rules;
-    if (it == end){
-        eof_error(errors);
-        return p_rules;
-    }
+    tok_eof(it, end, p_rules);
+    
     if (it->type != mtt::SECTION_PROD){
         push_error(it, end, "Missing or misaligned production block @productions");
         return p_rules;
@@ -339,10 +353,10 @@ std::unordered_map<std::string, std::vector<ProductionRule>> parse_prod(tok_it& 
     std::vector<ProductionRule> p_subrules;
     while (it->type != MuskTokenType::MUSK_EOF){
         p_subrules = parse_rule(it, end);
-        const std::string base = p_subrules[0].nt_base;
-        if (!p_rules.contains(base)) p_rules.emplace(base, p_subrules);
+        const ProductionTerm& base = p_subrules[0].nt_base;
+        if (!p_rules.contains(base.label)) p_rules.emplace(base.label, p_subrules);
         else {
-            std::vector<ProductionRule>& p_temp = p_rules.at(base);
+            std::vector<ProductionRule>& p_temp = p_rules.at(base.label);
             p_temp.insert(p_temp.end(), p_subrules.begin(), p_subrules.end());
         }
     }

@@ -23,6 +23,9 @@ FLEX_TARGET(
 )
 
 add_library(moschus_lib
+    src/errors/except_handler.cpp
+    src/errors/format_errors.cpp
+
     src/parser/parse_gen.cpp
     src/musk_template.cpp
     src/parser/frontend/musk_error.cpp

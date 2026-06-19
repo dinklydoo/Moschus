@@ -162,7 +162,7 @@ namespace ParseTable {
      * and items
      **/
     ParseState& get_start_state(const musk_ptr& ast){
-      const std::string& start = ast->start_nt;
+      const std::string& start = ast->start_nt.label;
       ProductionItem start_alias = ProductionProcesser::alias_.get_alias(start, false);
 
       std::unordered_set<CanonicalItem> start_items;

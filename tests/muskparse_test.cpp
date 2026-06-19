@@ -21,10 +21,10 @@ TEST(PARSER, UTILS_OK){
 
 TEST(PARSER, MISSING_TOKEN){
     MuskTokenStream tok_stream = TestBuilder::build_tok_s("missing_token.musk");
-    EXPECT_THROW(parse_musk(tok_stream), MoschusError);
+    EXPECT_THROW(parse_musk("../assets/missing_token.musk", tok_stream), MoschusError);
 }
 
 TEST(PARSER, MISSING_HEADER){
     MuskTokenStream tok_stream = TestBuilder::build_tok_s("missing_header.musk");
-    EXPECT_THROW(parse_musk(tok_stream), MoschusError);
+    EXPECT_THROW(parse_musk("../assets/missing_header.musk", tok_stream), MoschusError);
 }

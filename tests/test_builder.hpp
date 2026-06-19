@@ -29,6 +29,6 @@ struct TestBuilder {
 
   static musk_ptr build_ast(const char* path){
     MuskTokenStream tok_s = build_tok_s(path);
-    return parse_musk(tok_s);
+    return parse_musk(path, tok_s);
   }
 };

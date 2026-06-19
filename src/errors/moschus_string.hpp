@@ -7,6 +7,7 @@ nothing,
 red,
 yellow,
 magenta,
+green,
 cyan,
 white,
 black
@@ -65,6 +66,8 @@ struct MoschusString {
       std::string _col;
       if (color != Color::nothing){
         switch (color){
+          case Color::green :
+            _col = "32"; break;
           case Color::cyan :
             _col = "36"; break;
           case Color::magenta :

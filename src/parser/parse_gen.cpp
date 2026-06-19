@@ -28,7 +28,7 @@ MuskTokenStream lex_tokens(const char* path){
 
 void generate_parser(const std::string& musk_path, const std::string& output_file) {
   const MuskTokenStream tok_stream = lex_tokens((const char*)musk_path.data());
-  musk_ptr musk_ast = parse_musk(tok_stream);
+  musk_ptr musk_ast = parse_musk(musk_path, tok_stream);
 
   // output file is always non-empty, guarantee by main
 

@@ -28,53 +28,68 @@ struct MuskHeader {
 /* token declarations, just a token identifier (type is inferred from TokenProperties)*/
 struct TokenDeclaration {
   std::string token_identifier;
+
+  Location location;
 };
 
 /* non-term declarations, pair of non-terminal type and identifier */
 struct NonTerminalDeclaration {
   std::string nt_type;
   std::string nt_identifier;
+
+  Location location;
 };
 
 using RuleIdentifier = long long;
 
-/* a single production rule of form A -> a..A, specifies lhs and rhs + action when match*/
+// wrap Terms and their location for debugging/error messages
+struct ProductionTerm {
+  std::string label;
+  Location start_location;
+  Location end_location;
+};
+
+/* a single production rule of form A -> a..A, specifies lhs and rhs + action when match */
 struct ProductionRule {
   private:
     inline static RuleIdentifier _defined_rules = 0;
   public:
-    std::string nt_base;
+    ProductionTerm nt_base;
     std::string prod_action;
 
-    std::vector<std::string> nt_prods;
+    std::vector<ProductionTerm> nt_prods;
     RuleIdentifier rule_identifier;
 
-    ProductionRule(const std::string& _base) : nt_base(_base), rule_identifier(_defined_rules++) {};
+    ProductionRule(const std::string& _base, const Location& start_loc, const Location& end_loc) : nt_base(_base, start_loc, end_loc), rule_identifier(_defined_rules++) {};
 };
 
 /* tree representation of our .musk file */
 struct MuskAST {
-    TokenProperties tok_prop;
-    MuskHeader musk_header;
+  const std::string MUSK_PATH;
 
-    std::string start_nt;
+  TokenProperties tok_prop;
+  MuskHeader musk_header;
 
-    std::vector<TokenDeclaration> tok_decls;
-    std::vector<NonTerminalDeclaration> nt_decls;
+  ProductionTerm start_nt;
 
-    std::unordered_map<std::string, std::vector<ProductionRule>> prod_rules;
-    std::unordered_map<RuleIdentifier, ProductionRule> rules_by_id;
+  std::vector<TokenDeclaration> tok_decls;
+  std::vector<NonTerminalDeclaration> nt_decls;
+
+  std::unordered_map<std::string, std::vector<ProductionRule>> prod_rules;
+  std::unordered_map<RuleIdentifier, ProductionRule> rules_by_id;
+
+  MuskAST(const std::string fpath) : MUSK_PATH(fpath) {}
 };
 
 using tok_it = std::vector<MuskToken>::const_iterator;
 using decl_pair = std::pair<std::vector<TokenDeclaration>, std::vector<NonTerminalDeclaration>>;
 #define p_args tok_it&, tok_it
 
-musk_ptr parse_musk(const MuskTokenStream&);
+musk_ptr parse_musk(const std::string& fpath, const MuskTokenStream&);
 
 std::string parse_includes(p_args);
 std::string parse_utilities(p_args);
 TokenProperties parse_token_p(p_args);
 decl_pair parse_decl(p_args);
-std::string parse_start(p_args);
+ProductionTerm parse_start(p_args);
 std::unordered_map<std::string, std::vector<ProductionRule>> parse_prod(p_args);

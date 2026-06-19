@@ -1,14 +1,44 @@
+#include "frontend/musk_parser.hpp"
 #include "preprocess.hpp"
-#include "../errors/moschus_warning.hpp"
-#include "../errors/moschus_error.hpp"
+#include "../errors/except_handler.hpp"
+#include "../errors/format_errors.hpp"
 
+#include <format>
+#include <queue>
 #include <unordered_set>
-
-// TODO : MAYBE RENAME THIS TO FIRST_FOLLOW.CPP BCUZ TBH THATS ALL THIS IS DOING
 
 namespace ProductionProcesser {
 
   namespace {
+
+    // push a file formatted error
+    void push_f_error(const std::string& err_msg, const ProductionTerm& term){
+      MoschusExceptHandler::push_error(
+        MoschusError(
+          format_file_except(
+            format_message_loc(err_msg, term.start_location),
+            true,
+            term.start_location,
+            term.end_location
+          ),
+          MoschusErrorType::MoschusGeneric
+        )
+      );
+    }
+
+    void push_f_warning(const std::string& err_msg, const ProductionTerm& term){
+      MoschusExceptHandler::push_warning(
+        MoschusWarning(
+          format_file_except(
+            err_msg,
+            false,
+            term.start_location,
+            term.end_location
+          )
+        )
+      );
+    }
+
 
     /**
      * Register all production rules by their unique identifiers
@@ -45,56 +75,65 @@ namespace ProductionProcesser {
     }
 
     // Validate if a non-terminal has been defined and defined non-terminal
-    void validate_nonterm_exists(const std::string& non_term){
+    void validate_nonterm_exists(const ProductionTerm& non_term){
       static std::unordered_set<std::string> checked_;
-      if (checked_.contains(non_term)) return; // this symbol has already been checked
+      if (checked_.contains(non_term.label)) return; // this symbol has already been checked
 
       bool ok = false;
-      alias_.try_alias(non_term, false, ok);
+      alias_.try_alias(non_term.label, false, ok);
       if (!ok){
-        alias_.try_alias(non_term, true, ok);
+        alias_.try_alias(non_term.label, true, ok);
         if (ok){
-           // TODO : error for t definition instead of nt defn
+          push_f_error(
+            std::format("Production symbol \"{}\" is treated as a non-terminal but defined as terminal.", non_term.label),
+            non_term
+          );
         } else {
-          // TODO : error for undefined in both nt and t
+          push_f_error(
+            std::format("Production symbol \"{}\" is never defined.", non_term.label),
+            non_term
+          );
         }
       }
-      checked_.insert(non_term);
+      checked_.insert(non_term.label);
     }
 
     // check if a symbol is defined
     // is_nt: set non-terminal flag true if label is nonterminal otherwise set as false
-    void validate_symbol_exists(const std::string& label, bool& is_nt){
+    void validate_symbol_exists(const ProductionTerm& term, bool& is_nt){
       static std::unordered_map<std::string, bool> checked_;
-      if (checked_.contains(label)){
-        is_nt = checked_.at(label); // set nt flag based on prior check
+      if (checked_.contains(term.label)){
+        is_nt = checked_.at(term.label); // set nt flag based on prior check
         return;
       }
 
       bool ok = false;
-      ProductionItem _root_alias = alias_.try_alias(label, false, ok);
+      ProductionItem _root_alias = alias_.try_alias(term.label, false, ok);
       if (!ok){
-        alias_.try_alias(label, true, ok);
+        alias_.try_alias(term.label, true, ok);
         if (!ok){
-           // TODO : error for undefined
+          push_f_error(
+            std::format("Production symbol \"{}\" is never defined.", term.label),
+            term
+          );
         }
       }
-      checked_.emplace(label, is_nt);
+      checked_.emplace(term.label, is_nt);
     }
 
     // validate a singular production rule then return a vector containing all non-terminals
     // referenced inside of the production
     std::vector<std::string> validate_production_rule(ProductionRule& rule){
-      const std::string& non_term = rule.nt_base;
+      const ProductionTerm& non_term = rule.nt_base;
       validate_nonterm_exists(non_term);
 
       std::vector<std::string> referenced_nt;
-      for (const std::string& consequent : rule.nt_prods){
+      for (const ProductionTerm& consequent : rule.nt_prods){
         bool is_nt;
 
         validate_symbol_exists(consequent, is_nt);
         if (is_nt){
-          referenced_nt.push_back(consequent);
+          referenced_nt.push_back(consequent.label);
         }
       }
       return referenced_nt;
@@ -108,7 +147,7 @@ namespace ProductionProcesser {
     ** - Ensure all tokens in production rules are defined
      */
     void validate_productions(const musk_ptr& ast){
-      const std::string& root = ast->start_nt;
+      const ProductionTerm& root = ast->start_nt;
 
       // non-fatal if the non-terminal is not defined
       validate_nonterm_exists(root);
@@ -117,8 +156,8 @@ namespace ProductionProcesser {
 
       // BFS to find and verify all reachable productions from start token
       std::queue<std::string> traverse;
-      traverse.push(root);
-      validated.insert(root);
+      traverse.push(root.label);
+      validated.insert(root.label);
       while (!traverse.empty()){
         const std::string base = traverse.front();
         traverse.pop();
@@ -156,10 +195,10 @@ namespace ProductionProcesser {
         for (auto& rule : prods.second){
           RuleIdentifier rule_id = rule.rule_identifier;
           std::vector<SymbolAlias> consequent;
-          for (const std::string& symbol : rule.nt_prods){
+          for (const ProductionTerm& symbol : rule.nt_prods){
             bool is_nt;
-            ProductionItem symbol_alias = alias_.try_alias(symbol, false, is_nt);
-            if (!is_nt) symbol_alias = alias_.get_alias(symbol, true);
+            ProductionItem symbol_alias = alias_.try_alias(symbol.label, false, is_nt);
+            if (!is_nt) symbol_alias = alias_.get_alias(symbol.label, true);
 
             consequent.emplace_back(symbol_alias, !is_nt);
           }
@@ -209,7 +248,7 @@ namespace ProductionProcesser {
             }
 
             bool is_nt;
-            ProductionItem first_alias = alias_.try_alias(rule.nt_prods[0], false, is_nt);
+            ProductionItem first_alias = alias_.try_alias(rule.nt_prods[0].label, false, is_nt);
             if (is_nt) { // non-terminal first
               const ProductionObject& first_obj = store_.get_object(first_alias);
               nt_obj.FIRST_union(first_obj);
@@ -218,7 +257,7 @@ namespace ProductionProcesser {
               if (first_obj.is_NULLABLE()){
                 int next_i = 1;
                 for (; next_i < rule.nt_prods.size(); next_i++){
-                  ProductionItem next_alias = alias_.try_alias(rule.nt_prods[next_i], false, is_nt);
+                  ProductionItem next_alias = alias_.try_alias(rule.nt_prods[next_i].label, false, is_nt);
 
                   // non-terminal follows a NULLABLE non-terminal
                   if (is_nt){
@@ -230,7 +269,7 @@ namespace ProductionProcesser {
                   }
                   // terminal follows a NULLABLE non-terminal, is the FIRST token of this prod rule
                   else {
-                    ProductionItem next_alias = alias_.get_alias(rule.nt_prods[next_i], true);
+                    ProductionItem next_alias = alias_.get_alias(rule.nt_prods[next_i].label, true);
                     nt_obj.FIRST_insert(next_alias);
                     break;
                   }
@@ -243,7 +282,7 @@ namespace ProductionProcesser {
             }
             // terminal first directly in the FIRST set
             else {
-              first_alias = alias_.get_alias(rule.nt_prods[0], true);
+              first_alias = alias_.get_alias(rule.nt_prods[0].label, true);
               nt_obj.FIRST_insert(first_alias);
             }
 
@@ -258,10 +297,10 @@ namespace ProductionProcesser {
 
     // Get the ProductionObject& for a non-terminal in the production consequent
     // if the index is invalid OR term is a terminal then returns nullptr
-    ProductionObject* get_object_at(const std::vector<std::string> consequent, int index){
+    ProductionObject* get_object_at(const std::vector<ProductionTerm>& consequent, int index){
       if (index < 0 || index >= consequent.size()) return nullptr;
 
-      const std::string& label = consequent[index];
+      const std::string& label = consequent[index].label;
       bool is_nonterminal;
       ProductionItem item = alias_.try_alias(label, false, is_nonterminal);
       if (!is_nonterminal) return nullptr;
@@ -292,7 +331,7 @@ namespace ProductionProcesser {
             if (rule.nt_prods.empty()) continue;
 
             for (int i = 0; i < rule.nt_prods.size(); i++){
-              const std::string& term = rule.nt_prods[i];
+              const std::string& term = rule.nt_prods[i].label;
 
               bool is_nonterm;
               ProductionItem term_alias = alias_.try_alias(term, false, is_nonterm);
@@ -314,7 +353,7 @@ namespace ProductionProcesser {
                 ProductionObject* next_obj = get_object_at(rule.nt_prods, next_i);
                 // Not at the end of the consequent -> next term is a terminal symbol
                 if (next_obj == nullptr){
-                  ProductionItem terminal = alias_.get_alias(rule.nt_prods[next_i], true);
+                  ProductionItem terminal = alias_.get_alias(rule.nt_prods[next_i].label, true);
                   candidate.FOLLOW_insert(terminal);
 
                   break; // terminal ends the sequence
