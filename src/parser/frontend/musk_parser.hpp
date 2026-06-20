@@ -29,7 +29,8 @@ struct MuskHeader {
 struct TokenDeclaration {
   std::string token_identifier;
 
-  Location location;
+  Location start_location;
+  Location end_location;
 };
 
 /* non-term declarations, pair of non-terminal type and identifier */
@@ -37,7 +38,8 @@ struct NonTerminalDeclaration {
   std::string nt_type;
   std::string nt_identifier;
 
-  Location location;
+  Location start_location;
+  Location end_location;
 };
 
 using RuleIdentifier = long long;

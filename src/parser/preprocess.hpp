@@ -20,6 +20,8 @@ struct ProductionAlias {
     static inline unsigned long long _registered_alias = 1;
     std::unordered_map<std::string, ProductionItem> _terminal_alias;
     std::unordered_map<std::string, ProductionItem> _nonterm_alias;
+
+    std::unordered_map<ProductionItem, std::string> _reverse_alias;
   public:
     ProductionAlias(){
       _terminal_alias.emplace("__[EOF]__", 0);
@@ -28,6 +30,8 @@ struct ProductionAlias {
 
     ProductionItem try_alias(const std::string& label, bool terminal, bool& ok) const noexcept;
     ProductionItem get_alias(const std::string& label, bool terminal) const;
+
+    std::string get_label(ProductionItem alias) const;
 
     std::set<ProductionItem> get_terminals() const;
     std::set<ProductionItem> get_nonterminals() const;
@@ -62,15 +66,16 @@ struct std::hash<SymbolAlias>{
 
 struct ProductionRuleStore {
   private:
-    std::unordered_map<RuleIdentifier, std::vector<SymbolAlias>> _rules;
+    std::unordered_map<RuleIdentifier, std::pair<ProductionItem, std::vector<SymbolAlias>>> _rules;
     std::unordered_map<ProductionItem, std::vector<RuleIdentifier>> _produces;
   public:
-    void add_rule(RuleIdentifier rule_id, const std::vector<SymbolAlias>& consequent);
+    void add_rule(RuleIdentifier rule_id, ProductionItem base, const std::vector<SymbolAlias>& consequent);
     void add_productions(ProductionItem nt_alias, const std::vector<ProductionRule>& nt_prods);
 
     const std::vector<SymbolAlias>& get_prod_symbols(RuleIdentifier rule_id) const;
     SymbolAlias get_symbol_at(RuleIdentifier rule_id, unsigned long long pos) const;
     const std::vector<RuleIdentifier>& get_productions(ProductionItem item) const;
+    ProductionItem get_base(RuleIdentifier rule_id) const;
 };
 
 struct ProductionObject {

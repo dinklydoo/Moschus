@@ -16,6 +16,7 @@ void ProductionAlias::new_alias(const std::string& label, bool terminal){
   if (_map.count(label)) return;
 
   _map.emplace(label, _registered_alias);
+  _reverse_alias.emplace(_registered_alias, label);
   _registered_alias++;
 }
 
@@ -40,6 +41,10 @@ ProductionItem ProductionAlias::get_alias(const std::string& label, bool termina
     std::string err_string = std::string("No alias found for ")+((terminal)?"terminal":"non-terminal")+" named: "+label;
     throw MoschusError(err_string, MoschusErrorType::BadAccess);
   }
+}
+
+std::string ProductionAlias::get_label(ProductionItem alias) const {
+  return _reverse_alias.at(alias);
 }
 
 std::set<ProductionItem> ProductionAlias::get_terminals() const {
@@ -84,8 +89,8 @@ ProductionObject& ProductionStore::get_object(ProductionItem item) const {
   }
 }
 
-void ProductionRuleStore::add_rule(RuleIdentifier rule_id, const std::vector<SymbolAlias>& consequent){
-  _rules.emplace(rule_id, consequent);
+void ProductionRuleStore::add_rule(RuleIdentifier rule_id, ProductionItem base, const std::vector<SymbolAlias>& consequent){
+  _rules.emplace(rule_id, std::make_pair(base, consequent));
 }
 
 void ProductionRuleStore::add_productions(ProductionItem nt_alias, const std::vector<ProductionRule>& nt_prods){
@@ -95,15 +100,19 @@ void ProductionRuleStore::add_productions(ProductionItem nt_alias, const std::ve
 }
 
 const std::vector<SymbolAlias>& ProductionRuleStore::get_prod_symbols(RuleIdentifier rule_id) const {
-  return _rules.at(rule_id);
+  return _rules.at(rule_id).second;
 }
 
 SymbolAlias ProductionRuleStore::get_symbol_at(RuleIdentifier rule_id, unsigned long long pos) const{
-  return _rules.at(rule_id)[pos];
+  return get_prod_symbols(rule_id)[pos];
 }
 
 const std::vector<RuleIdentifier>& ProductionRuleStore::get_productions(ProductionItem item) const {
   return _produces.at(item);
+}
+
+ProductionItem ProductionRuleStore::get_base(RuleIdentifier rule_id) const {
+  return _rules.at(rule_id).first;
 }
 
 void ProductionObject::FIRST_insert(ProductionItem item){

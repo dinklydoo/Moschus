@@ -175,8 +175,10 @@ TokenDeclaration parse_tok_decl(tok_it& it, tok_it end){
     tok_it_incr(it, end, TokenDeclaration());
     if (it->type == mtt::TERM_DECL){
         const std::string& tok = it->internal;
+        const Location& s_loc = it->start_loc;
+        const Location& e_loc = it->end_loc;
         tok_it_incr(it, end, TokenDeclaration());
-        return TokenDeclaration(tok);
+        return TokenDeclaration(tok, s_loc, e_loc);
     }
     push_error(it, end, "Invalid token declaration, tokens should follow enumerable naming");
     return TokenDeclaration();
@@ -187,8 +189,10 @@ NonTerminalDeclaration parse_nt_decl(tok_it& it, tok_it end){
     tok_it_incr(it, end, NonTerminalDeclaration());
     if (it->type == mtt::TERM_DECL){
         const std::string& nt_label = it->internal;
+        const Location& s_loc = it->start_loc;
+        const Location& e_loc = it->end_loc;
         tok_it_incr(it, end, NonTerminalDeclaration());
-        return NonTerminalDeclaration(nt_type, nt_label);
+        return NonTerminalDeclaration(nt_type, nt_label, s_loc, e_loc);
     }
     push_error(it, end, "Invalid non-terminal declaration, non-terminal namings must follow regex [a-zA-Z0-9_]+");
     return NonTerminalDeclaration();

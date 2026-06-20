@@ -30,7 +30,7 @@ namespace ProductionProcesser {
       MoschusExceptHandler::push_warning(
         MoschusWarning(
           format_file_except(
-            err_msg,
+            format_message_loc(err_msg, term.start_location),
             false,
             term.start_location,
             term.end_location
@@ -181,8 +181,10 @@ namespace ProductionProcesser {
         const std::string& nt_label = nt_decl.nt_identifier;
         if (validated.contains(nt_label)) continue;
 
-        // TODO : warning messages here
-
+        push_f_warning(
+          std::format("Non-terminal \"{}\" is not reachable from start production.", nt_label),
+          ProductionTerm(nt_label, nt_decl.start_location, nt_decl.end_location)
+        );
       }
 
       // throw errors here -- as late as possible
@@ -208,7 +210,7 @@ namespace ProductionProcesser {
 
             consequent.emplace_back(symbol_alias, !is_nt);
           }
-          rules_.add_rule(rule_id, consequent);
+          rules_.add_rule(rule_id, nt_alias, consequent);
         }
       }
     }

@@ -85,6 +85,7 @@ std::string format_message_loc(const std::string& err_msg, const Location& loc){
 */
 std::string format_file_except(const std::string& err_msg, bool error, const Location& start_loc, const Location& end_loc){
   Color highlight_color = (error)? Color::red : Color::magenta;
+
   std::string result = MoschusString(highlight_color, err_msg.data()).to_string();
   result += '\n'; // new-line after error message
   size_t line_count_pad = std::max(num_len(start_loc.line), num_len(end_loc.line)) + 1;
@@ -99,8 +100,8 @@ std::string format_file_except(const std::string& err_msg, bool error, const Loc
     int critical_length = end_loc.col - start_loc.col;
 
     result += file_line.substr(0, start_loc.col-1);
-    result += MoschusString(highlight_color, file_line.substr(start_loc.col-1, critical_length+1).data()).to_string();
-    result += file_line.substr(end_loc.col);
+    result += MoschusString(highlight_color, file_line.substr(start_loc.col-1, critical_length).data()).to_string();
+    result += file_line.substr(end_loc.col-1);
 
     result += '\n'; // end the critical line
 

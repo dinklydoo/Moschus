@@ -99,11 +99,23 @@ struct ParseState {
     StateIdentifier get_identifier() const { return _state; }
 };
 
+struct ConflictTrace {
+  private:
+    std::vector<ConflictTrace> _trace;
+    bool _terminal; // trace is only a label
+    ProductionItem _symbol; // if terminal, represent terminal alias other represent the non-terminal that its trace derives
+  public:
+    ConflictTrace(bool terminal, ProductionItem symbol) : _terminal(terminal), _symbol(symbol) {}
+    ~ConflictTrace() = default;
+
+    size_t trace_length() const;
+    std::string format_trace() const;
+    void push_subtrace(const ConflictTrace&);
+};
+
 namespace ParseTable {
   using TransitionTable = std::unordered_map<StateIdentifier, std::unordered_map<ProductionItem, StateTransition>>;
   extern TransitionTable _table;
-
-  void clear(); // testing API
 
   void generate_parse_table(const musk_ptr& ast);
 }
