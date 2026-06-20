@@ -4,14 +4,17 @@
 #include "../src/parser/frontend/musk_parser.hpp"
 
 struct TestBuilder {
+
+  static std::string musk_test_path(const std::string& path){
+    return "tests/assets/"+path;
+  }
+
   static MuskTokenStream build_tok_s(const char* path){
     MuskTokenStream tok_stream;
 
-    char src[] = "tests/assets/";
-    char fpath[256];
-    snprintf(fpath, 256, "%s%s", src, path);
+    std::string fpath = musk_test_path(path);
 
-    FILE* f = fopen(fpath, "r");
+    FILE* f = fopen(fpath.data(), "r");
     yyin = f;
     reset_loc();
 
@@ -29,6 +32,6 @@ struct TestBuilder {
 
   static musk_ptr build_ast(const char* path){
     MuskTokenStream tok_s = build_tok_s(path);
-    return parse_musk(path, tok_s);
+    return parse_musk(musk_test_path(path), tok_s);
   }
 };

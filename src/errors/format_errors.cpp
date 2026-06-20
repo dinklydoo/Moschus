@@ -19,7 +19,6 @@ namespace {
     while (std::getline(MUSK_FILE, read_line)){
       MUSK_FILE_IN.push_back(read_line);
     }
-    MUSK_FILE.close();
   }
 
   // read a specific line in .musk file
@@ -27,7 +26,7 @@ namespace {
     if (line_no <= 0 || line_no >= MUSK_FILE_IN.size()){
       return "Error: line out of range";
     }
-    return MUSK_FILE_IN[line_no];
+    return MUSK_FILE_IN[line_no-1];
   }
 
   // get length of a number in string form
@@ -99,16 +98,16 @@ std::string format_file_except(const std::string& err_msg, bool error, const Loc
 
     int critical_length = end_loc.col - start_loc.col;
 
-    result += file_line.substr(0, start_loc.col);
-    result += MoschusString(highlight_color, file_line.substr(start_loc.col, critical_length).data()).to_string();
+    result += file_line.substr(0, start_loc.col-1);
+    result += MoschusString(highlight_color, file_line.substr(start_loc.col-1, critical_length+1).data()).to_string();
     result += file_line.substr(end_loc.col);
 
     result += '\n'; // end the critical line
 
     // end pad line, with underline of critical section
     result += std::string(line_count_pad, ' ')+"|";
-    result += std::string(' ', start_loc.col);
-    result += MoschusString(Color::green, std::string('^', critical_length).data()).to_string()+'\n';
+    result += std::string(start_loc.col, ' ');
+    result += MoschusString(Color::green, std::string(critical_length, '^').data()).to_string()+'\n';
   } else {
     for (int curr_line = start_loc.line; curr_line <= end_loc.line; curr_line++){
       result += MoschusString(Color::green, std::to_string(curr_line).data()).to_string() + " | ";

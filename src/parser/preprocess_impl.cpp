@@ -107,7 +107,7 @@ namespace ProductionProcesser {
         return;
       }
 
-      bool ok = false;
+      bool ok;
       ProductionItem _root_alias = alias_.try_alias(term.label, false, ok);
       if (!ok){
         alias_.try_alias(term.label, true, ok);
@@ -117,7 +117,10 @@ namespace ProductionProcesser {
             term
           );
         }
+        else is_nt = false;
       }
+      else is_nt = true;
+
       checked_.emplace(term.label, is_nt);
     }
 
@@ -149,8 +152,7 @@ namespace ProductionProcesser {
     void validate_productions(const musk_ptr& ast){
       const ProductionTerm& root = ast->start_nt;
 
-      // non-fatal if the non-terminal is not defined
-      validate_nonterm_exists(root);
+      validate_nonterm_exists(root); // check root exists
 
       std::unordered_set<std::string> validated; // non-terms already validated
 
@@ -180,8 +182,12 @@ namespace ProductionProcesser {
         if (validated.contains(nt_label)) continue;
 
         // TODO : warning messages here
+
       }
-      // TODO : throw here before the preprocesser runs
+
+      // throw errors here -- as late as possible
+      MoschusExceptHandler::log_warnings();
+      MoschusExceptHandler::log_errors();
     }
 
     /**
@@ -382,7 +388,6 @@ namespace ProductionProcesser {
 
     // sanitize the ast productions for pre-process errors/warnings
     validate_productions(ast);
-    // TODO : throw fatal errors here or inside of validate
 
     populate_rule_store(ast);
 

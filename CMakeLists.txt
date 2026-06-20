@@ -28,7 +28,6 @@ add_library(moschus_lib
 
     src/parser/parse_gen.cpp
     src/musk_template.cpp
-    src/parser/frontend/musk_error.cpp
     src/parser/frontend/musk_parser.cpp
     src/parser/preprocess_member.cpp
     src/parser/preprocess_impl.cpp
