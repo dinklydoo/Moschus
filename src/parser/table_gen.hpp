@@ -19,10 +19,11 @@ CONFLICT // placeholder conflict signal, tables will never escape generation wit
 
 using Position = unsigned long long;
 using StateIdentifier = unsigned long long;
+using ActionIdentifier = unsigned long long;
 
 struct StateTransition {
   StateAction action;
-  StateIdentifier next_state;
+  ActionIdentifier action_id;
 
   bool operator==(const StateTransition& _other) const = default;
 };
@@ -31,7 +32,7 @@ template<>
 struct std::hash<StateTransition>{
   std::size_t operator()(const StateTransition& st) const {
     std::size_t h1 = std::hash<StateAction>{}(st.action);
-    std::size_t h2 = std::hash<StateIdentifier>{}(st.next_state);
+    std::size_t h2 = std::hash<StateIdentifier>{}(st.action_id);
 
     return h1 ^ (h2 << 1);
   }
@@ -40,13 +41,13 @@ struct std::hash<StateTransition>{
 struct CanonicalItem {
   private:
     RuleIdentifier _rule;
-    const Position _position;
+    Position _position;
     mutable std::set<ProductionItem> _lookahead;
   public:
     CanonicalItem(RuleIdentifier rule, Position pos) : _rule(rule), _position(pos) {}
     CanonicalItem(RuleIdentifier rule, Position pos, const std::set<ProductionItem>& lookahead) : CanonicalItem(rule, pos){ _lookahead = lookahead; }
 
-    void include_lookahead(const std::set<ProductionItem>& items) const{
+    void include_lookahead(const std::set<ProductionItem>& items) const {
       _lookahead.insert(items.begin(), items.end());
     }
 
@@ -57,7 +58,7 @@ struct CanonicalItem {
 
     bool operator==(const CanonicalItem& _other) const {
       if (this == &_other) return true;
-      return _rule == _other._rule && _position == _other._position;
+      return _rule == _other._rule && _position == _other._position; //&& _lookahead == _other._lookahead;
     }
 };
 
@@ -73,7 +74,7 @@ struct std::hash<CanonicalItem>{
 
 struct ParseState {
   private:
-    const StateIdentifier _state;
+    StateIdentifier _state;
     std::unordered_set<CanonicalItem> _items;
     std::unordered_map<ProductionItem, std::unordered_set<StateTransition>> _actions; // for shift/reduce, on token input
   public:
@@ -117,5 +118,6 @@ namespace ParseTable {
   using TransitionTable = std::unordered_map<StateIdentifier, std::unordered_map<ProductionItem, StateTransition>>;
   extern TransitionTable _table;
 
+  void reset();
   void generate_parse_table(const musk_ptr& ast);
 }

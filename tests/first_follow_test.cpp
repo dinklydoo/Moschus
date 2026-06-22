@@ -68,6 +68,8 @@ TEST(PROCESSER, FF_EXAMPLE){
         {"DIV_EXP", {"ADD", "SUB", "MUL", "__[EOF]__"}},
     };
     test_FF_sets(EXP_FIRST, EXP_FOLLOW);
+
+    TestBuilder::reset();
 }
 
 TEST(PROCESSER, FF_NULLABLE){
@@ -98,4 +100,6 @@ TEST(PROCESSER, FF_NULLABLE){
     };
     test_nullable(EXP_NULLABLE);
     test_FF_sets(EXP_FIRST, EXP_FOLLOW);
+
+    TestBuilder::reset();
 }

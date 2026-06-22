@@ -25,7 +25,7 @@ struct MuskHeader {
   }
 };
 
-/* token declarations, just a token identifier (type is inferred from TokenProperties)*/
+/* token declarations, just a token identifier (type is inferred from TokenProperties) */
 struct TokenDeclaration {
   std::string token_identifier;
 
@@ -42,7 +42,7 @@ struct NonTerminalDeclaration {
   Location end_location;
 };
 
-using RuleIdentifier = long long;
+using RuleIdentifier = unsigned long long;
 
 // wrap Terms and their location for debugging/error messages
 struct ProductionTerm {

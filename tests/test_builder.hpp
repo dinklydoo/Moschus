@@ -3,6 +3,9 @@
 #include "../src/parser/frontend/musk_lexer.hpp"
 #include "../src/parser/frontend/musk_parser.hpp"
 
+#include "../src/parser/preprocess.hpp"
+#include "../src/parser/table_gen.hpp"
+
 struct TestBuilder {
 
   static std::string musk_test_path(const std::string& path){
@@ -33,5 +36,10 @@ struct TestBuilder {
   static musk_ptr build_ast(const char* path){
     MuskTokenStream tok_s = build_tok_s(path);
     return parse_musk(musk_test_path(path), tok_s);
+  }
+
+  static void reset() {
+    ProductionProcesser::reset();
+    ParseTable::reset();
   }
 };

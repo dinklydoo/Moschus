@@ -26,6 +26,7 @@ struct ProductionAlias {
     ProductionAlias(){
       _terminal_alias.emplace("__[EOF]__", 0);
     }
+    void reset();
     void new_alias(const std::string& label, bool terminal);
 
     ProductionItem try_alias(const std::string& label, bool terminal, bool& ok) const noexcept;
@@ -41,6 +42,7 @@ struct ProductionStore {
   private:
     std::unordered_map<ProductionItem, std::unique_ptr<ProductionObject>> _store;
   public:
+    void reset();
     void new_object(ProductionItem);
 
     ProductionObject* try_object(ProductionItem alias) const noexcept;
@@ -69,6 +71,7 @@ struct ProductionRuleStore {
     std::unordered_map<RuleIdentifier, std::pair<ProductionItem, std::vector<SymbolAlias>>> _rules;
     std::unordered_map<ProductionItem, std::vector<RuleIdentifier>> _produces;
   public:
+    void reset();
     void add_rule(RuleIdentifier rule_id, ProductionItem base, const std::vector<SymbolAlias>& consequent);
     void add_productions(ProductionItem nt_alias, const std::vector<ProductionRule>& nt_prods);
 
@@ -103,6 +106,8 @@ namespace ProductionProcesser {
   extern ProductionStore store_;
   extern ProductionAlias alias_;
   extern ProductionRuleStore rules_;
+
+  void reset(); // testing API to clear statics
 
   void process_musk_ast(const musk_ptr& ast);
 }

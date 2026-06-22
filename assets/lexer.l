@@ -45,6 +45,10 @@
         bracket_count.push(0);
     }
 
+    // TODO: ignore any brackets within cpp strings or chars
+    // these brackets may cause an odd count leading to lex errors
+    // just add a string or char flag and ignore if set
+
     int bracket_incr(){
         if (bracket_count.empty()){
             bracket_count.push(0);

@@ -75,9 +75,9 @@ namespace ProductionProcesser {
     }
 
     // Validate if a non-terminal has been defined and defined non-terminal
+    std::unordered_set<std::string> validate_nonterm_exists___checked_;
     void validate_nonterm_exists(const ProductionTerm& non_term){
-      static std::unordered_set<std::string> checked_;
-      if (checked_.contains(non_term.label)) return; // this symbol has already been checked
+      if (validate_nonterm_exists___checked_.contains(non_term.label)) return; // this symbol has already been checked
 
       bool ok = false;
       alias_.try_alias(non_term.label, false, ok);
@@ -95,15 +95,15 @@ namespace ProductionProcesser {
           );
         }
       }
-      checked_.insert(non_term.label);
+      validate_nonterm_exists___checked_.insert(non_term.label);
     }
 
     // check if a symbol is defined
     // is_nt: set non-terminal flag true if label is nonterminal otherwise set as false
+    std::unordered_map<std::string, bool> validate_symbol_exists___checked_;
     void validate_symbol_exists(const ProductionTerm& term, bool& is_nt){
-      static std::unordered_map<std::string, bool> checked_;
-      if (checked_.contains(term.label)){
-        is_nt = checked_.at(term.label); // set nt flag based on prior check
+      if (validate_symbol_exists___checked_.contains(term.label)){
+        is_nt = validate_symbol_exists___checked_.at(term.label); // set nt flag based on prior check
         return;
       }
 
@@ -121,7 +121,7 @@ namespace ProductionProcesser {
       }
       else is_nt = true;
 
-      checked_.emplace(term.label, is_nt);
+      validate_symbol_exists___checked_.emplace(term.label, is_nt);
     }
 
     // validate a singular production rule then return a vector containing all non-terminals
@@ -379,6 +379,15 @@ namespace ProductionProcesser {
         }
       }
     }
+  }
+
+  void reset(){
+    store_.reset();
+    alias_.reset();
+    rules_.reset();
+
+    validate_symbol_exists___checked_.clear();
+    validate_nonterm_exists___checked_.clear();
   }
 
   void process_musk_ast(const musk_ptr& ast){

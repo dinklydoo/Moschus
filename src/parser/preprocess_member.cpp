@@ -1,3 +1,4 @@
+#include "frontend/musk_parser.hpp"
 #include "preprocess.hpp"
 #include "../errors/moschus_error.hpp"
 
@@ -149,4 +150,21 @@ const std::set<ProductionItem>& ProductionObject::get_FIRST() const {
 
 const std::set<ProductionItem>& ProductionObject::get_FOLLOW() const {
   return FOLLOW;
+}
+
+// testing APIs for clearing static stores
+void ProductionAlias::reset() {
+  _nonterm_alias.clear();
+  _terminal_alias.clear();
+  _terminal_alias.emplace("__[EOF]__", 0);
+  _registered_alias = 1;
+}
+
+void ProductionStore::reset() {
+  _store.clear();
+}
+
+void ProductionRuleStore::reset(){
+  _rules.clear();
+  _produces.clear();
 }

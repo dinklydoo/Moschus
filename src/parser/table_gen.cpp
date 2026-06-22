@@ -5,16 +5,17 @@
 
 #include <format>
 #include <queue>
+#include <unordered_set>
 
 namespace ParseTable {
   TransitionTable _table;
 
   namespace {
-    std::vector<ParseState> _states;
+    std::unordered_map<StateIdentifier, ParseState> _states;
     
     bool contains_state(const std::unordered_set<CanonicalItem>& items){
       for (const auto& state : _states){
-        if (state.equivalent(items)) return true;
+        if (state.second.equivalent(items)) return true;
       }
       return false;
     }
@@ -25,14 +26,15 @@ namespace ParseTable {
      **/
     StateIdentifier find_state(const std::unordered_set<CanonicalItem>& items){
       for (const auto& state : _states){
-        if (state.equivalent(items)) return state.get_identifier();
+        if (state.second.equivalent(items)) return state.second.get_identifier();
       }
       return 0;
     }
 
     ParseState& create_state(const std::unordered_set<CanonicalItem>& items){
-      _states.push_back(ParseState(_states.size()));
-      ParseState& new_state = *_states.rbegin();
+      StateIdentifier state_id = _states.size();
+      _states.emplace(state_id, ParseState(state_id));
+      ParseState& new_state = _states.at(state_id);
 
       for (auto& item : items){
         new_state.add_item(item);
@@ -43,7 +45,7 @@ namespace ParseTable {
 
     /**
      * Build sequential FIRST sets from rest of item rule production
-     * @param -- start : start iterator from position+1
+     * @param -- start : start iterator from position
      * @param -- end : end iterator for comparison
      * @param -- lookahead : lookahead set if the rest of the sequence is NULLABLE
      * */
@@ -75,33 +77,42 @@ namespace ParseTable {
     // generate the state closure based on the initial items
     std::unordered_set<CanonicalItem> closure(const std::unordered_set<CanonicalItem>& start_set){
       std::unordered_set<CanonicalItem> CLOSURE = start_set; // copy cons into
+      std::unordered_set<CanonicalItem> last_CLOSURE = CLOSURE;
 
-      for (const CanonicalItem& c_item : start_set){
-        RuleIdentifier rule_id = c_item.get_rule_id();
-        Position position = c_item.get_position();
+      bool fixed_point = false;
+      while (!fixed_point){
+        for (const CanonicalItem& c_item : CLOSURE){
+          RuleIdentifier rule_id = c_item.get_rule_id();
+          Position position = c_item.get_position();
 
-        const std::vector<SymbolAlias>& rule_symbols = ProductionProcesser::rules_.get_prod_symbols(rule_id);
+          const std::vector<SymbolAlias>& rule_symbols = ProductionProcesser::rules_.get_prod_symbols(rule_id);
+          if (rule_symbols.empty()) continue; // NULL reduction
 
-        const SymbolAlias& head_symbol = rule_symbols[position];
-        if (head_symbol.terminal) continue; // terminal symbols don't contribute to the closure
+          const SymbolAlias& head_symbol = rule_symbols[position];
+          if (head_symbol.terminal) continue; // terminal symbols don't contribute to the closure
 
-        std::set<ProductionItem> seq_FIRST = sequence_FIRST(
-          rule_symbols.begin() + position,
-          rule_symbols.end(),
-          c_item.get_lookaheads()
-        );
+          std::set<ProductionItem> seq_FIRST = sequence_FIRST(
+            rule_symbols.begin() + position,
+            rule_symbols.end(),
+            c_item.get_lookaheads()
+          );
 
-        ProductionItem nt_alias = head_symbol.symbol;
-        for (RuleIdentifier nt_prod_rule : ProductionProcesser::rules_.get_productions(nt_alias)){
-          CanonicalItem new_item{rule_id, 0, seq_FIRST};
-          if (CLOSURE.contains(new_item)){
-            const CanonicalItem& c_item = *CLOSURE.find(new_item);
-            c_item.include_lookahead(seq_FIRST);
-          }
-          else {
-            CLOSURE.emplace(rule_id, 0, seq_FIRST);
+          if (seq_FIRST.empty()) continue; // reduce sequence does not produce new items
+
+          ProductionItem nt_alias = head_symbol.symbol;
+          for (RuleIdentifier nt_prod_rule : ProductionProcesser::rules_.get_productions(nt_alias)){
+            CanonicalItem new_item{nt_prod_rule, 0, seq_FIRST};
+            if (CLOSURE.contains(new_item)){
+              const CanonicalItem& c_item = *CLOSURE.find(new_item);
+              c_item.include_lookahead(seq_FIRST);
+            }
+            else {
+              CLOSURE.emplace(nt_prod_rule, 0, seq_FIRST);
+            }
           }
         }
+        fixed_point = (CLOSURE == last_CLOSURE);
+        last_CLOSURE = CLOSURE;
       }
       return CLOSURE;
     }
@@ -109,9 +120,9 @@ namespace ParseTable {
     std::set<StateIdentifier> construct_state(StateIdentifier curr_state){
       std::set<StateIdentifier> new_states;
 
-      const std::unordered_set<CanonicalItem>& curr_closure = _states[curr_state].get_items();
+      ParseState& state = _states.at(curr_state);
+      const std::unordered_set<CanonicalItem>& curr_closure = _states.at(curr_state).get_items();
 
-      ParseState& state = create_state(curr_closure);
       std::unordered_map<SymbolAlias, std::unordered_set<CanonicalItem>> transition_items;
 
       for (const CanonicalItem& item : curr_closure){
@@ -122,7 +133,7 @@ namespace ParseTable {
 
         // end of a production -> REDUCE sequence (no next state, only reduce and pop state)
         if (pos == rule.size()){
-          StateTransition state_transition = StateTransition(StateAction::REDUCE, 0);
+          StateTransition state_transition = StateTransition(StateAction::REDUCE, rule_id);
           state.add_reduce(item.get_lookaheads(), state_transition);
           continue;
         }
@@ -305,7 +316,8 @@ namespace ParseTable {
      * store the non-terminals taken to root and reverse replacing with token names
      **/
     void build_table(){
-      for (const ParseState& state : _states){
+      for (const auto& state_pair : _states){
+        const ParseState& state = state_pair.second;
         std::unordered_map<ProductionItem, StateTransition> state_actions;
 
         std::unordered_set<StateTransition> actions;
@@ -411,6 +423,11 @@ namespace ParseTable {
     }
 
   } // end of namespace (helpers)
+
+  void reset() {
+    _states.clear();
+    _table.clear();
+  }
 
   void generate_parse_table(const musk_ptr& ast){
     ParseState& start_state = get_start_state(ast);
