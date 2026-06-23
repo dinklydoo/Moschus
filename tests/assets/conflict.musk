@@ -1,0 +1,28 @@
+@includes[
+    include "tokens.hpp"
+    include "ast.hpp"
+]
+
+@utilities[
+    ast* tree;
+    TypeSystem ts = TypeSystem::instance();
+]
+
+@token_obj[token::Token]
+@token_type[token::TokenKind]
+
+@declarations[
+    token a
+    token c
+
+    ast*  S
+    expr* A
+    expr* B
+]
+
+@start[S]
+@productions[
+    S : a A c $$ {} | a B c $$ {} | a c $$ {};
+    A : {};
+    B : {};
+]

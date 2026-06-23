@@ -216,9 +216,10 @@ namespace ParseTable {
           if (item.get_lookaheads().contains(input)){
             reduce_items.push_back(item);
           }
+          continue;
         }
 
-        if (rule_prods[pos+1].symbol == input){ // this is a SHIFT
+        if (rule_prods[pos].symbol == input){ // this is a SHIFT
           shift_items.push_back(item);
         }
       }
@@ -279,7 +280,7 @@ namespace ParseTable {
         MoschusString(
           Color::red,
           std::format(
-            "State:{} has conflicting actions on Token:\"{}\" :\n",
+            "State {} has conflicting actions on Token:\"{}\" :\n",
             state.get_identifier(),
             ProductionProcesser::alias_.get_label(input)
           ).data()
@@ -320,13 +321,11 @@ namespace ParseTable {
         const ParseState& state = state_pair.second;
         std::unordered_map<ProductionItem, StateTransition> state_actions;
 
-        std::unordered_set<StateTransition> actions;
-
         size_t N_CONFLICTS = 0;
 
         auto populate_table = [&](const auto& alias_symbols){
           for (ProductionItem input : alias_symbols){
-            actions = state.get_action(input);
+            const std::unordered_set<StateTransition>& actions = state.get_action(input);
             if (actions.empty()){ // error: no such step to production
               state_actions.emplace(input, StateTransition(StateAction::ERROR, 0));
             }
@@ -356,11 +355,11 @@ namespace ParseTable {
         //     )
         //   );
         // }
-        MoschusExceptHandler::log_warnings();
-        MoschusExceptHandler::log_errors();
-
+        
         _table.emplace(state.get_identifier(), state_actions);
       }
+      MoschusExceptHandler::log_warnings();
+      MoschusExceptHandler::log_errors();
     }
 
 

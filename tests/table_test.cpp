@@ -2,12 +2,15 @@
 #include <unordered_map>
 #include "test_builder.hpp"
 #include "../src/parser/table_gen.hpp"
+#include "../src/errors/moschus_error.hpp"
 
 struct LabelledTransition {
     std::string label;
     StateAction action;
     StateIdentifier next_state;
 };
+
+//TODO : check rule aliasing, bit annoying rn because rules are still static and we need to hash them
 
 // Check the table topology,
 // Topology equivalence implies full table equivalence in LR(1)
@@ -47,8 +50,6 @@ void check_topology(const std::map<StateIdentifier, std::vector<LabelledTransiti
 
 
 TEST(TABLE, EXAMPLE){
-  ParseTable::_table.clear();
-
   musk_ptr ast = TestBuilder::build_ast("example.musk");
   ProductionProcesser::process_musk_ast(ast);
   ParseTable::generate_parse_table(ast);
@@ -169,8 +170,6 @@ TEST(TABLE, EXAMPLE){
 }
 
 TEST(TABLE, NULLABLE){
-  ParseTable::_table.clear();
-
   musk_ptr ast = TestBuilder::build_ast("nullable.musk");
   ProductionProcesser::process_musk_ast(ast);
   ParseTable::generate_parse_table(ast);
@@ -252,4 +251,11 @@ TEST(TABLE, NULLABLE){
   EXPECT_NO_THROW();
 
   TestBuilder::reset();
+}
+
+TEST(TABLE, CONFLICT){
+  musk_ptr ast = TestBuilder::build_ast("conflict.musk");
+  ProductionProcesser::process_musk_ast(ast);
+
+  EXPECT_THROW(ParseTable::generate_parse_table(ast), MoschusError);
 }

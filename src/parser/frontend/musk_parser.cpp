@@ -302,7 +302,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
         switch (it->type) {
             case mtt::TERM_DECL : {
                 if (eof_consumed){
-                    push_warning(it, end, "Productions past an EOF token $$, production is never satisfied");
+                    push_warning(it, end, "Productions past an EOF token '$$', production is never satisfied");
                 }
                 p_rule.nt_prods.emplace_back(it->internal, it->start_loc, it->end_loc);
                 tok_it_incr(it, end, p_rules);
@@ -318,6 +318,7 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
                 p_rule.prod_action = it->internal;
                 tok_it_incr(it, end, p_rules);
                 in_sequence = false;
+                eof_consumed = false;
                 break;
             }
             default : {

@@ -156,7 +156,10 @@ const std::set<ProductionItem>& ProductionObject::get_FOLLOW() const {
 void ProductionAlias::reset() {
   _nonterm_alias.clear();
   _terminal_alias.clear();
+  _reverse_alias.clear();
+  
   _terminal_alias.emplace("__[EOF]__", 0);
+  _reverse_alias.emplace(0, "$$");
   _registered_alias = 1;
 }
 

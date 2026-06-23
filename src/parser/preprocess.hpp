@@ -25,6 +25,7 @@ struct ProductionAlias {
   public:
     ProductionAlias(){
       _terminal_alias.emplace("__[EOF]__", 0);
+      _reverse_alias.emplace(0, "$$");
     }
     void reset();
     void new_alias(const std::string& label, bool terminal);

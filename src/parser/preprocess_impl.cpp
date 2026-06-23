@@ -164,6 +164,9 @@ namespace ProductionProcesser {
         const std::string base = traverse.front();
         traverse.pop();
 
+        // terminal
+        if (!ast->prod_rules.contains(base)) continue;
+
         std::vector<ProductionRule>& productions = ast->prod_rules.at(base);
         for (ProductionRule& prod : productions) {
           std::vector<std::string> referenced_nt = validate_production_rule(prod);
