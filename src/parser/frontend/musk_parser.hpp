@@ -75,7 +75,7 @@ struct MuskAST {
   ProductionTerm start_nt;
 
   std::vector<TokenDeclaration> tok_decls;
-  std::vector<NonTerminalDeclaration> nt_decls;
+  std::unordered_map<std::string, NonTerminalDeclaration> nt_decls;
 
   std::unordered_map<std::string, std::vector<ProductionRule>> prod_rules;
   std::unordered_map<RuleIdentifier, ProductionRule> rules_by_id;
@@ -84,7 +84,7 @@ struct MuskAST {
 };
 
 using tok_it = std::vector<MuskToken>::const_iterator;
-using decl_pair = std::pair<std::vector<TokenDeclaration>, std::vector<NonTerminalDeclaration>>;
+using decl_pair = std::pair<std::vector<TokenDeclaration>, std::unordered_map<std::string,NonTerminalDeclaration>>;
 #define p_args tok_it&, tok_it
 
 musk_ptr parse_musk(const std::string& fpath, const MuskTokenStream&);

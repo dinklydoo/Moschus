@@ -11,11 +11,11 @@ namespace ParseTable {
   TransitionTable _table;
 
   namespace {
-    std::unordered_map<StateIdentifier, ParseState> _states;
+    std::vector<ParseState> _states;
     
     bool contains_state(const std::unordered_set<CanonicalItem>& items){
       for (const auto& state : _states){
-        if (state.second.equivalent(items)) return true;
+        if (state.equivalent(items)) return true;
       }
       return false;
     }
@@ -26,14 +26,14 @@ namespace ParseTable {
      **/
     StateIdentifier find_state(const std::unordered_set<CanonicalItem>& items){
       for (const auto& state : _states){
-        if (state.second.equivalent(items)) return state.second.get_identifier();
+        if (state.equivalent(items)) return state.get_identifier();
       }
       return 0;
     }
 
     ParseState& create_state(const std::unordered_set<CanonicalItem>& items){
       StateIdentifier state_id = _states.size();
-      _states.emplace(state_id, ParseState(state_id));
+      _states.push_back(ParseState(state_id));
       ParseState& new_state = _states.at(state_id);
 
       for (auto& item : items){
@@ -120,7 +120,6 @@ namespace ParseTable {
     std::set<StateIdentifier> construct_state(StateIdentifier curr_state){
       std::set<StateIdentifier> new_states;
 
-      ParseState& state = _states.at(curr_state);
       const std::unordered_set<CanonicalItem>& curr_closure = _states.at(curr_state).get_items();
 
       std::unordered_map<SymbolAlias, std::unordered_set<CanonicalItem>> transition_items;
@@ -134,7 +133,7 @@ namespace ParseTable {
         // end of a production -> REDUCE sequence (no next state, only reduce and pop state)
         if (pos == rule.size()){
           StateTransition state_transition = StateTransition(StateAction::REDUCE, rule_id);
-          state.add_reduce(item.get_lookaheads(), state_transition);
+          _states.at(curr_state).add_reduce(item.get_lookaheads(), state_transition);
           continue;
         }
 
@@ -165,7 +164,7 @@ namespace ParseTable {
           (current_symbol.terminal)? StateAction::SHIFT : StateAction::GOTO,
           shift_state
         );
-        state.add_shift_goto(current_input, state_transition);
+        _states.at(curr_state).add_shift_goto(current_input, state_transition);
       }
       return new_states;
     }
@@ -317,9 +316,14 @@ namespace ParseTable {
      * store the non-terminals taken to root and reverse replacing with token names
      **/
     void build_table(){
-      for (const auto& state_pair : _states){
-        const ParseState& state = state_pair.second;
-        std::unordered_map<ProductionItem, StateTransition> state_actions;
+      _table.resize(_states.size());
+
+      size_t num_terms = 
+        ProductionProcesser::alias_.get_nonterminals().size() + 
+        ProductionProcesser::alias_.get_terminals().size();
+
+      for (const auto& state : _states){
+        std::vector<StateTransition> state_actions(num_terms);
 
         size_t N_CONFLICTS = 0;
 
@@ -327,17 +331,17 @@ namespace ParseTable {
           for (ProductionItem input : alias_symbols){
             const std::unordered_set<StateTransition>& actions = state.get_action(input);
             if (actions.empty()){ // error: no such step to production
-              state_actions.emplace(input, StateTransition(StateAction::ERROR, 0));
+              state_actions[input] = StateTransition(StateAction::ERROR, 0);
             }
             else if (actions.size() > 1){ // fatal generator error: r-r or s-r conflict
-              state_actions.emplace(input, StateTransition(StateAction::CONFLICT, 0));
+              state_actions[input] = StateTransition(StateAction::CONFLICT, 0);
               size_t conflict_actions = actions.size();
               N_CONFLICTS += (conflict_actions * (conflict_actions - 1))/2;
 
               format_conflict_err(state, input, actions);
             }
             else { // just copy over action
-              state_actions.emplace(input, *actions.begin());
+              state_actions[input] = *actions.begin();
             }
           }
         };
@@ -356,7 +360,7 @@ namespace ParseTable {
         //   );
         // }
         
-        _table.emplace(state.get_identifier(), state_actions);
+        _table[state.get_identifier()] = state_actions;
       }
       MoschusExceptHandler::log_warnings();
       MoschusExceptHandler::log_errors();

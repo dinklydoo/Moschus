@@ -66,10 +66,10 @@ namespace ProductionProcesser {
     **/
     void populate_nonterminals(const musk_ptr& ast){
       for (auto& non_term : ast->nt_decls){
-        alias_.new_alias(non_term.nt_identifier, false);
+        alias_.new_alias(non_term.first, false);
 
         // create the alias item
-        ProductionItem item = alias_.get_alias(non_term.nt_identifier, false);
+        ProductionItem item = alias_.get_alias(non_term.first, false);
         store_.new_object(item);
       }
     }
@@ -180,13 +180,14 @@ namespace ProductionProcesser {
       }
 
       // mark and warn on unreachable/unused non-terminals
-      for (NonTerminalDeclaration& nt_decl : ast->nt_decls){
-        const std::string& nt_label = nt_decl.nt_identifier;
+      for (const auto& nt_decl : ast->nt_decls){
+        const auto& declaration = nt_decl.second;
+        const std::string& nt_label = declaration.nt_identifier;
         if (validated.contains(nt_label)) continue;
 
         push_f_warning(
           std::format("Non-terminal \"{}\" is not reachable from start production.", nt_label),
-          ProductionTerm(nt_label, nt_decl.start_location, nt_decl.end_location)
+          ProductionTerm(nt_label, declaration.start_location, declaration.end_location)
         );
       }
 

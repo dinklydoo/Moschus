@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <unordered_map>
 #include "test_builder.hpp"
 #include "../src/parser/table_gen.hpp"
 #include "../src/errors/moschus_error.hpp"

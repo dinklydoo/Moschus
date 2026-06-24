@@ -200,7 +200,7 @@ NonTerminalDeclaration parse_nt_decl(tok_it& it, tok_it end){
 
 decl_pair parse_decl(tok_it& it, tok_it end){
     std::vector<TokenDeclaration> tok_decl;
-    std::vector<NonTerminalDeclaration> nt_decl;
+    std::unordered_map<std::string, NonTerminalDeclaration> nt_decl;
 
     tok_eof(it, end, std::make_pair(tok_decl, nt_decl));
 
@@ -218,9 +218,11 @@ decl_pair parse_decl(tok_it& it, tok_it end){
                 tok_decl.push_back(parse_tok_decl(it, end));
                 break;
             case mtt::TERM_DECL: // term is a stricter binding of type, a type can be parsed as a term
-            case mtt::TYPE_DECL:
-                nt_decl.push_back(parse_nt_decl(it, end));
+            case mtt::TYPE_DECL: {
+                NonTerminalDeclaration nt = parse_nt_decl(it, end);
+                nt_decl.emplace(nt.nt_identifier, nt);
                 break;
+            }
             case mtt::SECTION_START:
                 in_declarations = false;
                 break;
@@ -240,7 +242,7 @@ decl_pair parse_decl(tok_it& it, tok_it end){
         defined.insert(id);
     }
     for (const auto& nt : nt_decl){
-        const std::string& id = nt.nt_identifier;
+        const std::string& id = nt.second.nt_identifier;
         if (defined.count(id)){
             push_warning(it, end, "Duplicate definitions of token/non-terminal symbol "+id);
         }

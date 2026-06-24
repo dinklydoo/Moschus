@@ -115,7 +115,7 @@ struct ConflictTrace {
 };
 
 namespace ParseTable {
-  using TransitionTable = std::unordered_map<StateIdentifier, std::unordered_map<ProductionItem, StateTransition>>;
+  using TransitionTable = std::vector<std::vector<StateTransition>>;
   extern TransitionTable _table;
 
   void reset();
