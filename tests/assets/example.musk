@@ -1,11 +1,10 @@
 @includes[
-    include "tokens.hpp"
-    include "ast.hpp"
+    #include "tokens.hpp"
+    #include "ast.hpp"
 ]
 
 @utilities[
     ast* tree;
-    TypeSystem ts = TypeSystem::instance();
 ]
 
 @token_obj[token::Token]
@@ -28,12 +27,12 @@
 @start[CALC_EXP]
 @productions[
     CALC_EXP : ADD_EXP $$ {
-        return new CalcExp($1);
+        return new calc_expr($1);
     };
 
     ADD_EXP 
     : SUB_EXP ADD ADD_EXP {
-        return new ArithExp($2.op, $1, $3);
+        return new arith_expr($2.op, $1, $3);
     }
     | SUB_EXP {
         return $1;
@@ -41,7 +40,7 @@
     
     SUB_EXP
     : MUL_EXP SUB SUB_EXP {
-        return new ArithExp(%2.op, $1, $3);
+        return new arith_expr($2.op, $1, $3);
     }
     | MUL_EXP {
         return $1;
@@ -49,7 +48,7 @@
 
     MUL_EXP
     : DIV_EXP MUL MUL_EXP {
-        return new ArithExp(%2.op, $1, $3);
+        return new arith_expr($2.op, $1, $3);
     }
     | DIV_EXP {
         return $1;
@@ -57,9 +56,9 @@
 
     DIV_EXP
     : INT DIV DIV_EXP {
-        return new ArithExp(%2.op, $1, $3);
+        return new arith_expr($2.op, $1, $3);
     }
     | INT {
-        return new IntExp($1);
+        return new int_expr($1);
     };
 ]

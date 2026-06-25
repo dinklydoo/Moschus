@@ -53,16 +53,13 @@ struct ProductionTerm {
 
 /* a single production rule of form A -> a..A, specifies lhs and rhs + action when match */
 struct ProductionRule {
-  private:
-    inline static RuleIdentifier _defined_rules = 0;
-  public:
-    ProductionTerm nt_base;
-    std::string prod_action;
+  ProductionTerm nt_base;
+  std::string prod_action;
 
-    std::vector<ProductionTerm> nt_prods;
-    RuleIdentifier rule_identifier;
+  std::vector<ProductionTerm> nt_prods;
+  RuleIdentifier rule_identifier;
 
-    ProductionRule(const std::string& _base, const Location& start_loc, const Location& end_loc) : nt_base(_base, start_loc, end_loc), rule_identifier(_defined_rules++) {};
+  ProductionRule(const std::string& _base, const Location& start_loc, const Location& end_loc) : nt_base(_base, start_loc, end_loc) {};
 };
 
 /* tree representation of our .musk file */

@@ -4,9 +4,9 @@
 #include "../src/errors/moschus_error.hpp"
 
 struct LabelledTransition {
-    std::string label;
-    StateAction action;
-    StateIdentifier next_state;
+  std::string label;
+  StateAction action;
+  StateIdentifier next_state;
 };
 
 //TODO : check rule aliasing, bit annoying rn because rules are still static and we need to hash them
@@ -257,4 +257,6 @@ TEST(TABLE, CONFLICT){
   ProductionProcesser::process_musk_ast(ast);
 
   EXPECT_THROW(ParseTable::generate_parse_table(ast), MoschusError);
+
+  TestBuilder::reset();
 }

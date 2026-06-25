@@ -68,3 +68,7 @@ vcpkg_installed/
 # test output & cache
 Testing/
 .cache/
+
+# ignore the test output files -> generated on run
+tests/out/parser.cpp
+tests/out/parser.hpp

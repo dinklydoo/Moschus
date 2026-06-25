@@ -274,6 +274,7 @@ MuskToken yylex();
         update_loc(yytext);
         bracket_nest();
         bracket_incr();
+        strbuf.clear();
         yy_push_state(CODE_BLOCK_S);
     }
 

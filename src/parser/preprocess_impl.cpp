@@ -44,8 +44,10 @@ namespace ProductionProcesser {
      * Register all production rules by their unique identifiers
      **/
     void register_production_rules(const musk_ptr& ast){
+      RuleIdentifier rule_count = 0;
       for (auto& rules_by_nt : ast->prod_rules){
         for (auto& p_rule : rules_by_nt.second){
+          p_rule.rule_identifier = rule_count++;
           ast->rules_by_id.emplace(p_rule.rule_identifier, p_rule);
         }
       }
