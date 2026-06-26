@@ -22,7 +22,7 @@
 
 @start[S]
 @productions[
-    S : a A c $$ {} | a B c $$ {} | a c $$ {};
+    S : a A c {} | a B c {} | a c {};
     A : {};
     B : {};
 ]

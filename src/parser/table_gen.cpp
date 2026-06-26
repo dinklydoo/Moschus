@@ -51,7 +51,6 @@ namespace ParseTable {
      * */
     std::set<ProductionItem> sequence_FIRST(auto begin, auto end, const std::set<ProductionItem>& lookahead){
       std::set<ProductionItem> FIRST;
-      if (begin == end) return FIRST; // this is a reduce sequence [A -> Bβ•, LA]
 
       begin++;
       for (; begin != end; begin++){
@@ -76,43 +75,44 @@ namespace ParseTable {
 
     // generate the state closure based on the initial items
     std::unordered_set<CanonicalItem> closure(const std::unordered_set<CanonicalItem>& start_set){
-      std::unordered_set<CanonicalItem> CLOSURE = start_set; // copy cons into
-      std::unordered_set<CanonicalItem> last_CLOSURE = CLOSURE;
+      std::unordered_set<CanonicalItem> CLOSURE = start_set;
+      std::queue<CanonicalItem> worklist;
+      
+      for (const auto& item : start_set){
+        worklist.push(item);
+      }
 
-      bool fixed_point = false;
-      while (!fixed_point){
-        for (const CanonicalItem& c_item : CLOSURE){
-          RuleIdentifier rule_id = c_item.get_rule_id();
-          Position position = c_item.get_position();
+      while (!worklist.empty()){
+        CanonicalItem c_item = worklist.front(); worklist.pop();
 
-          const std::vector<SymbolAlias>& rule_symbols = ProductionProcesser::rules_.get_prod_symbols(rule_id);
-          if (rule_symbols.empty()) continue; // NULL reduction
+        RuleIdentifier rule_id = c_item.get_rule_id();
+        Position position = c_item.get_position();
 
-          const SymbolAlias& head_symbol = rule_symbols[position];
-          if (head_symbol.terminal) continue; // terminal symbols don't contribute to the closure
+        const std::vector<SymbolAlias>& rule_symbols = ProductionProcesser::rules_.get_prod_symbols(rule_id);
 
-          std::set<ProductionItem> seq_FIRST = sequence_FIRST(
-            rule_symbols.begin() + position,
-            rule_symbols.end(),
-            c_item.get_lookaheads()
-          );
+        // REDUCE action on NULL or non-null production
+        if (rule_symbols.empty() || position == rule_symbols.size()) continue;
 
-          if (seq_FIRST.empty()) continue; // reduce sequence does not produce new items
+        const SymbolAlias& head_symbol = rule_symbols[position];
+        if (head_symbol.terminal) continue; // terminal does not contribute
 
-          ProductionItem nt_alias = head_symbol.symbol;
-          for (RuleIdentifier nt_prod_rule : ProductionProcesser::rules_.get_productions(nt_alias)){
-            CanonicalItem new_item{nt_prod_rule, 0, seq_FIRST};
-            if (CLOSURE.contains(new_item)){
-              const CanonicalItem& c_item = *CLOSURE.find(new_item);
-              c_item.include_lookahead(seq_FIRST);
-            }
-            else {
-              CLOSURE.emplace(nt_prod_rule, 0, seq_FIRST);
-            }
+        std::set<ProductionItem> seq_FIRST = sequence_FIRST(
+          rule_symbols.begin() + position,
+          rule_symbols.end(),
+          c_item.get_lookaheads()
+        );
+        if (seq_FIRST.empty()) continue;
+
+        for (RuleIdentifier nt_prod_rule : ProductionProcesser::rules_.get_productions(head_symbol.symbol)){
+          CanonicalItem new_item{nt_prod_rule, 0, seq_FIRST};
+          if (auto it = CLOSURE.find(new_item); it != CLOSURE.end()){
+            if (it->include_lookahead(seq_FIRST))
+              worklist.push(*it); // lookaheads grew
+          } else {
+            CLOSURE.emplace(nt_prod_rule, 0, seq_FIRST);
+            worklist.push(new_item); // new item
           }
         }
-        fixed_point = (CLOSURE == last_CLOSURE);
-        last_CLOSURE = CLOSURE;
       }
       return CLOSURE;
     }
@@ -179,7 +179,7 @@ namespace ParseTable {
 
       std::unordered_set<CanonicalItem> start_items;
       for (RuleIdentifier start_rule : ProductionProcesser::rules_.get_productions(start_alias)){
-        start_items.emplace(start_rule, 0, std::set<ProductionItem>{});
+        start_items.emplace(start_rule, 0, std::set<ProductionItem>{0}); // add EOF lookahead for all productions
       }
       start_items = closure(start_items);
       ParseState& start_state = create_state(start_items);

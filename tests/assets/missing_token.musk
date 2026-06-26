@@ -27,7 +27,7 @@
 
 @start[CALC_EXP]
 @productions[
-    CALC_EXP : ADD_EXP $$ {
+    CALC_EXP : ADD_EXP {
         return new CalcExp($1);
     };
 

@@ -39,7 +39,6 @@ TEST(LEXER, MUSK_FILE){
         mtt::TERM_DECL, // CALC_EXP prod
         mtt::PROD_SEP,
         mtt::TERM_DECL,
-        mtt::PROD_EOF,
         mtt::CODE_BLOCK,
         mtt::PROD_END,
         mtt::TERM_DECL, // ADD_EXP prod

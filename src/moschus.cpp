@@ -33,7 +33,7 @@ int main(int argc, char* argv[]) {
       return 0;
     }
 
-    // Validate that output path is called with parser generation
+    // Validate that output dir is called with parser generation
     if (program.is_used("--output")) {
       if (!program.is_used("--generate")) {
         std::cerr << "--output flag must be used in conjunction with Moschus generate mode" << std::endl;
@@ -49,13 +49,14 @@ int main(int argc, char* argv[]) {
         return 1;
       }
 
-      std::string output_file = musk_file.substr(0, musk_file.size() - std::string(".musk").size());
+      std::filesystem::path musk_path = musk_file;
+      std::string output_dir = musk_path.parent_path();
       if (program.is_used("--output")) {
-        output_file = program.get<std::string>("output");
+        output_dir = program.get<std::string>("output");
       }
 
       try {
-        generate_parser(musk_file ,output_file);
+        generate_parser(musk_file ,output_dir);
       } catch (const MoschusError &e) {
         // TODO log error or smthing -> based on type
         return -1;

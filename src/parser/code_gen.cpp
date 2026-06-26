@@ -355,7 +355,7 @@ namespace CodeGenerator {
       RULE_FN+="unsigned long long reduce_rule_"+std::to_string(rule.rule_identifier)+"(MoschusParser& parser){\n";
 
       // write '$X' variables as locals and removing/retrieving from the term stack
-      for (size_t i = 0; i < prod_symbols.size(); i++){
+      for (ssize_t i = prod_symbols.size()-1; i >= 0; i--){
         const SymbolAlias& symbol = prod_symbols[i];
         if (symbol.terminal){
           RULE_FN+="  auto $"+std::to_string(i+1)+" = pop_term(parser).get_terminal();\n";
@@ -378,7 +378,7 @@ namespace CodeGenerator {
           +rule.prod_action+
           "\n  /* END .MUSK RULE "+std::to_string(rule.rule_identifier)+" CODE DEFINTION */"
           "\n  };\n"
-          "  PROD_TERM term(self());\n";
+          "  PROD_TERM term((NT_VARIANT)self());\n";
       } 
       // If type is void we don't need any lambda wrapper around self construction as the value
       // of self is never used, only side-effects.
@@ -493,7 +493,7 @@ namespace CodeGenerator {
         "    \n"
         "    switch (action) {\n"
         "      case (ParserAction::SHIFT) : {\n"
-        "        _term_stack.emplace(token, idx);\n"
+        "        _term_stack.emplace(token);\n"
         "        _state_stack.push(identifier);\n"
         "        return;\n"
         "      }\n"
@@ -518,6 +518,26 @@ namespace CodeGenerator {
       const std::string& start_type = ast->nt_decls.at(ast->start_nt.label).nt_type;
       std::string PARSE_FIN =
         start_type+" MoschusParser::parse_final(){\n"
+        "  for (;;) {\n"
+        "    PARSER_STATE current_state = _state_stack.top();\n"
+        "    const ParserTransition& transition = PARSER_TABLE[current_state][0];\n"
+        "    \n"
+        "    ParserAction action = transition.action;\n"
+        "    unsigned long long identifier = transition.identifier;\n"
+        "    \n"
+        "    switch (action) {\n"
+        "      case (ParserAction::REDUCE) : {\n"
+        "        unsigned long long non_terminal_idx = reduce_map[identifier](*this);\n"
+        "        current_state = _state_stack.top();\n"
+        "        \n"
+        "        const ParserTransition& goto_transition = PARSER_TABLE[current_state][non_terminal_idx];\n"
+        "        _state_stack.push(goto_transition.identifier);\n"
+        "        continue;\n"
+        "      }\n"
+        "      default : break;\n"
+        "    }\n"
+        "    break;\n"
+        "  }\n"
         "  if (_state_stack.size() != 1 || _state_stack.top() != 0){\n"
         "    // throw here\n"
         "  }\n"

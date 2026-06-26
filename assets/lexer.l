@@ -278,7 +278,6 @@ MuskToken yylex();
         yy_push_state(CODE_BLOCK_S);
     }
 
-    "$$"                        { return MuskToken(mtt::PROD_EOF, post_update(yytext), loc); }
     "|"                         { return MuskToken(mtt::PROD_SUM, post_update(yytext), loc); }
     ":"                         { return MuskToken(mtt::PROD_SEP, post_update(yytext), loc); }
     ";"                         { return MuskToken(mtt::PROD_END, post_update(yytext), loc); }

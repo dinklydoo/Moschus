@@ -62,10 +62,10 @@ TEST(PROCESSER, FF_EXAMPLE){
   };
   exp_sets EXP_FOLLOW = {
     {"CALC_EXP", {}},
-    {"ADD_EXP", {"__[EOF]__"}},
-    {"SUB_EXP", {"ADD", "__[EOF]__"}},
-    {"MUL_EXP", {"ADD", "SUB", "__[EOF]__"}},
-    {"DIV_EXP", {"ADD", "SUB", "MUL", "__[EOF]__"}},
+    {"ADD_EXP", {}},
+    {"SUB_EXP", {"ADD"}},
+    {"MUL_EXP", {"ADD", "SUB"}},
+    {"DIV_EXP", {"ADD", "SUB", "MUL"}},
   };
   test_FF_sets(EXP_FIRST, EXP_FOLLOW);
 
@@ -78,14 +78,14 @@ TEST(PROCESSER, FF_NULLABLE){
   ProductionProcesser::process_musk_ast(ast);
   
   exp_null EXP_NULLABLE = {
-    {"S", false},
+    {"S", true},
     {"A", true},
     {"B", true},
     {"C", true},
     {"D", true}
   };
   exp_sets EXP_FIRST = {
-    {"S", {"a", "b", "c", "d", "__[EOF]__"}},
+    {"S", {"a", "b", "c", "d"}},
     {"A", {"a"}},
     {"B", {"b"}},
     {"C", {"c"}},
@@ -93,10 +93,10 @@ TEST(PROCESSER, FF_NULLABLE){
   };
   exp_sets EXP_FOLLOW = {
     {"S", {}},
-    {"A", {"b", "c", "d", "__[EOF]__"}},
-    {"B", {"c", "d", "__[EOF]__"}},
-    {"C", {"d", "__[EOF]__"}},
-    {"D", {"__[EOF]__"}},
+    {"A", {"b", "c", "d"}},
+    {"B", {"c", "d"}},
+    {"C", {"d"}},
+    {"D", {}},
   };
   test_nullable(EXP_NULLABLE);
   test_FF_sets(EXP_FIRST, EXP_FOLLOW);

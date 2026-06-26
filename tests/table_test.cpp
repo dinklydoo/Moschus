@@ -66,25 +66,25 @@ TEST(TABLE, EXAMPLE){
     },
     {1, 
       {
-        {"__[EOF]__", StateAction::SHIFT, 6}
+        {"__[EOF]__", StateAction::REDUCE, 0}
       }
     },
     {2,
       {
-        {"ADD", StateAction::SHIFT, 7},
+        {"ADD", StateAction::SHIFT, 6},
         {"__[EOF]__", StateAction::REDUCE, 0},
       }
     },
     {3,
       {
-        {"SUB", StateAction::SHIFT, 8},
+        {"SUB", StateAction::SHIFT, 7},
         {"__[EOF]__", StateAction::REDUCE, 0},
         {"ADD", StateAction::REDUCE, 0}
       }
     },
     {4,
       {
-        {"MUL", StateAction::SHIFT, 9},
+        {"MUL", StateAction::SHIFT, 8},
         {"__[EOF]__", StateAction::REDUCE, 0},
         {"ADD", StateAction::REDUCE, 0},
         {"SUB", StateAction::REDUCE, 0}
@@ -92,7 +92,7 @@ TEST(TABLE, EXAMPLE){
     },
     {5,
       {
-        {"DIV", StateAction::SHIFT, 10},
+        {"DIV", StateAction::SHIFT, 9},
         {"__[EOF]__", StateAction::REDUCE, 0},
         {"ADD", StateAction::REDUCE, 0},
         {"SUB", StateAction::REDUCE, 0},
@@ -101,58 +101,53 @@ TEST(TABLE, EXAMPLE){
     },
     {6,
       {
-        // TODO : start state lookahead should be all or none? --> decide later
-      }
-    },
-    {7,
-      {
-        {"ADD_EXP", StateAction::GOTO, 11},
+        {"ADD_EXP", StateAction::GOTO, 10},
         {"SUB_EXP", StateAction::GOTO, 2},
         {"MUL_EXP", StateAction::GOTO, 3},
         {"DIV_EXP", StateAction::GOTO, 4},
         {"INT", StateAction::SHIFT, 5}
       }
     },
-    {8,
+    {7,
       {
-        {"SUB_EXP", StateAction::GOTO, 12},
+        {"SUB_EXP", StateAction::GOTO, 11},
         {"MUL_EXP", StateAction::GOTO, 3},
         {"DIV_EXP", StateAction::GOTO, 4},
         {"INT", StateAction::SHIFT, 5}
       }
     },
+    {8,
+        {
+          {"MUL_EXP", StateAction::GOTO, 12},
+          {"DIV_EXP", StateAction::GOTO, 4},
+          {"INT", StateAction::SHIFT, 5}
+        }
+    },
     {9,
         {
-          {"MUL_EXP", StateAction::GOTO, 13},
-          {"DIV_EXP", StateAction::GOTO, 4},
+          {"DIV_EXP", StateAction::GOTO, 13},
           {"INT", StateAction::SHIFT, 5}
         }
     },
     {10,
         {
-          {"DIV_EXP", StateAction::GOTO, 14},
-          {"INT", StateAction::SHIFT, 5}
-        }
-    },
-    {11,
-        {
           {"__[EOF]__", StateAction::REDUCE, 0}
         }
     },
-    {12,
+    {11,
         {
           {"__[EOF]__", StateAction::REDUCE, 0},
           {"ADD", StateAction::REDUCE, 0}
         }
     },
-    {13,
+    {12,
         {
           {"__[EOF]__", StateAction::REDUCE, 0},
           {"ADD", StateAction::REDUCE, 0},
           {"SUB", StateAction::REDUCE, 0}
         }
     },
-    {14,
+    {13,
         {
           {"__[EOF]__", StateAction::REDUCE, 0},
           {"ADD", StateAction::REDUCE, 0},
@@ -231,7 +226,7 @@ TEST(TABLE, NULLABLE){
     },
     {7,
       {
-        {"__[EOF]__", StateAction::SHIFT, 9}
+        {"__[EOF]__", StateAction::REDUCE, 0}
       }
     },
     {8,
@@ -239,11 +234,6 @@ TEST(TABLE, NULLABLE){
         {"__[EOF]__", StateAction::REDUCE, 0}
       }
     },
-    {9,
-      {
-        // TODO -> lookahead on start
-      }
-    }
   };
 
   check_topology(topo_nullable);

@@ -1,0 +1,60 @@
+@includes[
+    #include "tokens.hpp"
+]
+
+@token_obj[token::Token]
+@token_type[token::TokenKind]
+
+@declarations[
+    token INT
+    token ADD
+    token SUB
+    token MUL
+    token DIV
+    token LPAREN
+    token RPAREN
+
+    int CALC_EXP
+    int EXPR
+    int TERM
+    int FACTOR
+]
+
+@start[CALC_EXP]
+
+@productions[
+    CALC_EXP
+    : EXPR {
+        return $1;
+    };
+
+    EXPR
+    : EXPR ADD TERM {
+        return $1 + $3;
+    }
+    | EXPR SUB TERM {
+        return $1 - $3;
+    }
+    | TERM {
+        return $1;
+    };
+
+    TERM
+    : TERM MUL FACTOR {
+        return $1 * $3;
+    }
+    | TERM DIV FACTOR {
+        return $1 / $3;
+    }
+    | FACTOR {
+        return $1;
+    };
+
+    FACTOR
+    : LPAREN EXPR RPAREN {
+        return $2;
+    }
+    | INT {
+        return $1.get_value();
+    };
+]

@@ -299,28 +299,17 @@ std::vector<ProductionRule> parse_rule(tok_it& it, tok_it end){
     ProductionRule p_rule(nt_base, start_loc, end_loc);
 
     bool in_sequence = true;
-    bool eof_consumed = false;
     while (in_sequence) {
         switch (it->type) {
             case mtt::TERM_DECL : {
-                if (eof_consumed){
-                    push_warning(it, end, "Productions past an EOF token '$$', production is never satisfied");
-                }
                 p_rule.nt_prods.emplace_back(it->internal, it->start_loc, it->end_loc);
                 tok_it_incr(it, end, p_rules);
-                break;
-            }
-            case mtt::PROD_EOF : {
-                p_rule.nt_prods.emplace_back("__[EOF]__", it->start_loc, it->end_loc);
-                tok_it_incr(it, end, p_rules);
-                eof_consumed = true;
                 break;
             }
             case mtt::CODE_BLOCK : {
                 p_rule.prod_action = it->internal;
                 tok_it_incr(it, end, p_rules);
                 in_sequence = false;
-                eof_consumed = false;
                 break;
             }
             default : {

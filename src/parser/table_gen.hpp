@@ -47,8 +47,10 @@ struct CanonicalItem {
     CanonicalItem(RuleIdentifier rule, Position pos) : _rule(rule), _position(pos) {}
     CanonicalItem(RuleIdentifier rule, Position pos, const std::set<ProductionItem>& lookahead) : CanonicalItem(rule, pos){ _lookahead = lookahead; }
 
-    void include_lookahead(const std::set<ProductionItem>& items) const {
+    bool include_lookahead(const std::set<ProductionItem>& items) const {
+      size_t old_size = _lookahead.size();
       _lookahead.insert(items.begin(), items.end());
+      return _lookahead.size() != old_size;
     }
 
     RuleIdentifier get_rule_id() const { return _rule; }
@@ -58,17 +60,18 @@ struct CanonicalItem {
 
     bool operator==(const CanonicalItem& _other) const {
       if (this == &_other) return true;
-      return _rule == _other._rule && _position == _other._position; //&& _lookahead == _other._lookahead;
+      return _rule == _other._rule && _position == _other._position && _lookahead == _other._lookahead;
     }
 };
 
 template<>
 struct std::hash<CanonicalItem>{
   std::size_t operator()(const CanonicalItem& item) const {
-    std::size_t h1 = std::hash<RuleIdentifier>{}(item.get_rule_id());
-    std::size_t h2 = std::hash<Position>{}(item.get_position());
-
-    return h1 ^ (h2 << 1);
+    std::size_t h = std::hash<RuleIdentifier>{}(item.get_rule_id());
+    h ^= std::hash<Position>{}(item.get_position()) << 1;
+    for (ProductionItem la : item.get_lookaheads())
+      h ^= std::hash<ProductionItem>{}(la) << 2;
+    return h;
   }
 };
 

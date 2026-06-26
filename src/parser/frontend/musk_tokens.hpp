@@ -33,7 +33,6 @@ TOK_DECL, // token
 TYPE_DECL, // loose match of words
 TERM_DECL, // stricter form of type decl
 
-PROD_EOF, // eof token $$
 PROD_SUM, // production sum |
 PROD_SEP, // production seperator :
 PROD_END, // production end ;
