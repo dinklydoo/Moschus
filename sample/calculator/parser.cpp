@@ -187,7 +187,7 @@ void error_state_0(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 0 */ 
   throw ParserError(
     "Syntax Error in State 0:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -219,7 +219,7 @@ void error_state_4(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 4 */ 
   throw ParserError(
     "Syntax Error in State 4:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -235,7 +235,7 @@ void error_state_6(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 6 */ 
   throw ParserError(
     "Syntax Error in State 6:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -243,7 +243,7 @@ void error_state_7(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 7 */ 
   throw ParserError(
     "Syntax Error in State 7:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -251,7 +251,7 @@ void error_state_8(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 8 */ 
   throw ParserError(
     "Syntax Error in State 8:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -259,7 +259,7 @@ void error_state_9(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 9 */ 
   throw ParserError(
     "Syntax Error in State 9:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -267,7 +267,7 @@ void error_state_10(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 10 */ 
   throw ParserError(
     "Syntax Error in State 10:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -275,7 +275,7 @@ void error_state_11(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 11 */ 
   throw ParserError(
     "Syntax Error in State 11:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -283,7 +283,7 @@ void error_state_12(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 12 */ 
   throw ParserError(
     "Syntax Error in State 12:\n"
-    "Expected only tokens: , ADD, SUB, RPAREN"
+    "Expected only tokens: ADD, SUB, RPAREN"
   );
 }
 
@@ -291,7 +291,7 @@ void error_state_13(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 13 */ 
   throw ParserError(
     "Syntax Error in State 13:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -299,7 +299,7 @@ void error_state_14(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 14 */ 
   throw ParserError(
     "Syntax Error in State 14:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -323,7 +323,7 @@ void error_state_17(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 17 */ 
   throw ParserError(
     "Syntax Error in State 17:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -331,7 +331,7 @@ void error_state_18(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 18 */ 
   throw ParserError(
     "Syntax Error in State 18:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -339,7 +339,7 @@ void error_state_19(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 19 */ 
   throw ParserError(
     "Syntax Error in State 19:\n"
-    "Expected only tokens: , ADD, SUB, RPAREN"
+    "Expected only tokens: ADD, SUB, RPAREN"
   );
 }
 
@@ -355,7 +355,7 @@ void error_state_21(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 21 */ 
   throw ParserError(
     "Syntax Error in State 21:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -363,7 +363,7 @@ void error_state_22(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 22 */ 
   throw ParserError(
     "Syntax Error in State 22:\n"
-    "Expected only tokens: , INT, LPAREN"
+    "Expected only tokens: INT, LPAREN"
   );
 }
 
@@ -387,7 +387,7 @@ void error_state_25(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 25 */ 
   throw ParserError(
     "Syntax Error in State 25:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -395,7 +395,7 @@ void error_state_26(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 26 */ 
   throw ParserError(
     "Syntax Error in State 26:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -403,7 +403,7 @@ void error_state_27(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 27 */ 
   throw ParserError(
     "Syntax Error in State 27:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -411,7 +411,7 @@ void error_state_28(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 28 */ 
   throw ParserError(
     "Syntax Error in State 28:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 
@@ -419,7 +419,7 @@ void error_state_29(token::Token){
   /* REDEFINE EXCEPT HANDLER FOR STATE 29 */ 
   throw ParserError(
     "Syntax Error in State 29:\n"
-    "Expected only tokens: , ADD, SUB, MUL, DIV, RPAREN"
+    "Expected only tokens: ADD, SUB, MUL, DIV, RPAREN"
   );
 }
 

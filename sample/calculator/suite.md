@@ -1,1 +1,0 @@
-Small testing suite for generated parser of example.musk

@@ -1,5 +1,5 @@
 #include "code_gen.hpp"
-#include "../errors/moschus_string.hpp"
+#include "../errors/except_handler.hpp"
 #include "preprocess.hpp"
 #include "table_gen.hpp"
 
@@ -434,10 +434,13 @@ namespace CodeGenerator {
         "    \"Syntax Error in State "+std::to_string(STATE)+":\\n\"\n"
         "    \"Expected only tokens: ";
       
+      bool seen_first = false;
       for (size_t i = 0; i < ParseTable::_table[STATE].size(); i++){
         const StateTransition& transition = ParseTable::_table[STATE][i];
         if (transition.action != StateAction::REDUCE && transition.action != StateAction::SHIFT) continue;
-        if (i > 0) ERR_FN += ", ";
+        if (seen_first) ERR_FN += ", ";
+        else seen_first = true;
+        
         ERR_FN += ProductionProcesser::alias_.get_label(i);
       }
       ERR_FN +=  
@@ -602,19 +605,33 @@ namespace CodeGenerator {
     std::string HPP_PATH = _OUTPUT_DIR+"/parser.hpp";
     std::string CPP_PATH = _OUTPUT_DIR+"/parser.cpp";
 
+    auto fd_err = [&](const std::string& path) {
+      MoschusExceptHandler::push_error(
+        MoschusError(
+          MoschusString(
+            Color::red, "File I/O error, could not open file "
+          ).to_string()+
+          MoschusString(
+            Color::yellow, Modifier::italic, 
+            std::format("\"{}\"", path).c_str()
+          ).to_string()
+          ,
+          MoschusErrorType::FileIOError
+        )
+      );
+    };
+
     std::ofstream HPP_FILE(HPP_PATH, std::ios::out);
     if (!HPP_FILE.is_open()){
-      // TODO : throw here
+      fd_err(HPP_PATH);
     }
-
     std::ofstream CPP_FILE(CPP_PATH, std::ios::out);
     if (!CPP_FILE.is_open()){
-      // TODO : also here
+      fd_err(CPP_PATH);
     }
+    MoschusExceptHandler::log_errors();
 
     generate_hpp(ast, HPP_FILE);
     generate_cpp(ast, CPP_FILE);
-
-    // TODO : LOG SUCCESSFUL MESSAGE HERE
   }
 }

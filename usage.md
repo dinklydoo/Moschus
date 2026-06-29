@@ -1,7 +1,7 @@
 # Moschus Usage
 Moschus follows yacc production syntax however the parser file defined as the `.musk` file is made to be more intuitive and structured than yacc.
 
-Unlike YACC and ANTLR however Moschus supports LR(1) grammars as opposed to LALR(1) in Yacc and LR(k-ish?) in ANTLR.
+Unlike YACC and ANTLR however Moschus supports LR(1) grammars as opposed to LALR(1) in Yacc and LL(k-ish?) in ANTLR.
 
 To actually run the parser given we already have a suitable `.musk` file:
 ~~~
@@ -13,15 +13,13 @@ To actually run the parser given we already have a suitable `.musk` file:
 OR
 > moschus --generate [filename].musk
 # this will output two files in the same directory as [filename]
-# - [filename].cpp
-# - [filename].hpp
-# corresponding to the parser body in the .cpp file
-# and the parser header in the .cpp file
+# - parser.cpp
+# - parser.hpp
 
 # if you wish to specify your own output path, just add the output flags:
-> moschus -g [filename].musk -o [output_file]
+> moschus -g [filename].musk -o [output_dir]
 OR
-> moschus -g [filename].musk --output [output_file]
+> moschus -g [filename].musk --output [output_dir]
 ~~~
 To define a Moschus Parser File you can either create one from scratch with any name suffixed with `.musk`:
 ~~~
@@ -97,7 +95,7 @@ A small example of a small arithmetic `.musk` file looks like this
 
 @start[CALC_EXP]
 @productions[
-    CALC_EXP : ADD_EXP $$ {
+    CALC_EXP : ADD_EXP {
         return new CalcExp($1);
     };
 
@@ -138,7 +136,7 @@ namespace tok {
     struct Token {
     private:
         TokenKind kind;
-        std::variant[int, float] value;
+        std::variant<int, float> value;
 
     public:
         // note : the enum class is not required to be nested
@@ -159,7 +157,3 @@ namespace tok {
 @token_type[tok::Token::TokenKind]
 
 ~~~
-
-TODO : need a way to identify token types, either provide an identifier function on the type that will return an ENUM with the token names
-
-TODO : in the future add a native LEXER "fuscous"

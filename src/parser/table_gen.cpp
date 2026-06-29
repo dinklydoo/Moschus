@@ -3,6 +3,7 @@
 #include "table_gen.hpp"
 #include "../errors/except_handler.hpp"
 
+#include <iostream>
 #include <format>
 #include <queue>
 #include <unordered_set>
@@ -225,8 +226,22 @@ namespace ParseTable {
       return {shift_items, reduce_items};
     }
 
+    std::string format_lookaheads(const CanonicalItem& item){
+      std::string LA_STR;
+      // format lookaheads
+      LA_STR += "[ ";
+      const auto& lookaheads = item.get_lookaheads();
+
+      for (auto it = lookaheads.begin(); it != lookaheads.end(); it++){
+        if (it != lookaheads.begin()) LA_STR += ", ";
+        LA_STR += ProductionProcesser::alias_.get_label(*it);
+      }
+      LA_STR += " ]\n";
+      return LA_STR;
+    }
+
     // format an item that can shift on an input,
-    // A -> b B • c
+    // A -> b B • c    [ LA ]
     std::string format_shift_item(const CanonicalItem& item){
       RuleIdentifier rule_id = item.get_rule_id();
       const std::vector<SymbolAlias>& rule_prods = ProductionProcesser::rules_.get_prod_symbols(rule_id);
@@ -240,12 +255,13 @@ namespace ParseTable {
         const SymbolAlias& symbol = rule_prods[i];
         res += ProductionProcesser::alias_.get_label(symbol.symbol);
       }
-      res += '\n';
+      res += "    ";
+      res += format_lookaheads(item);
       return res;
     }
 
     // format an item that reduces on lookahead input,
-    // A -> b B •  [ c ]
+    // A -> b B •    [ LA ]
     std::string format_reduce_item(const CanonicalItem& item){
       RuleIdentifier rule_id = item.get_rule_id();
       const std::vector<SymbolAlias>& rule_prods = ProductionProcesser::rules_.get_prod_symbols(rule_id);
@@ -257,17 +273,9 @@ namespace ParseTable {
         const SymbolAlias& symbol = rule_prods[i];
         res += ProductionProcesser::alias_.get_label(symbol.symbol);
       }
-      res += "•\t";
+      res += "•    ";
 
-      // format lookaheads
-      res += "[ ";
-      const auto& lookaheads = item.get_lookaheads();
-
-      for (auto it = lookaheads.begin(); it != lookaheads.end(); it++){
-        if (it != lookaheads.begin()) res += ", ";
-        res += ProductionProcesser::alias_.get_label(*it);
-      }
-      res += " ]\n";
+      res += format_lookaheads(item);
       return res;
     }
 
@@ -348,22 +356,36 @@ namespace ParseTable {
         populate_table(ProductionProcesser::alias_.get_terminals());
         populate_table(ProductionProcesser::alias_.get_nonterminals());
 
-        // if (N_CONFLICTS > 0){
-        //   // TODO : check verbosity flags --> if set rerun a bfs with tracking of path and generate all conflicts
-
-        //   MoschusExceptHandler::push_error(
-        //     MoschusError(
-        //       MoschusString(Color::red, std::format("Provided grammar has {} SHIFT-REDUCE or REDUCE-REDUCE conflict(s).\n", N_CONFLICTS).data()).to_string()+
-        //       MoschusString(Color::red, Modifier::italic, "[for more information use flag '-v', '--verbose' to generate up to 5 traces]").to_string(),
-        //       MoschusErrorType::MoschusGeneric
-        //     )
-        //   );
-        // }
+        if (N_CONFLICTS > 0){
+        // TODO : check verbosity flags --> if set rerun a bfs with tracking of path and generate all conflicts
+        }
         
         _table[state.get_identifier()] = state_actions;
       }
       MoschusExceptHandler::log_warnings();
       MoschusExceptHandler::log_errors();
+    }
+
+    void print_states(){
+      for (const auto& state : _states){
+        std::string STATE_STR;
+        size_t STATE_ID = state.get_identifier();
+        STATE_STR += std::format("STATE {}:\n", STATE_ID);
+        STATE_STR += std::string('_', STATE_STR.size() - 1) + '\n';
+
+        for (const auto& item : state.get_items()){
+          RuleIdentifier rule = item.get_rule_id();
+          const auto& prods = ProductionProcesser::rules_.get_prod_symbols(rule);
+
+          if (item.get_position() == prods.size()){
+            STATE_STR += format_reduce_item(item);
+          } else {
+            STATE_STR += format_shift_item(item);
+          }
+        }
+        STATE_STR += "\n";
+        std::cout << STATE_STR << std::endl;
+      }
     }
 
 
